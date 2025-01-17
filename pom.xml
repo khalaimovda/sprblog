@@ -14,6 +14,19 @@
   </properties>
 
   <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+      <version>6.2.2</version>
+    </dependency>
+
+    <!-- It is necessary to specify due to some exceptions in the initialization class -->
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+        <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.1.0</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
