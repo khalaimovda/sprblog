@@ -11,6 +11,10 @@
             <tr>
                 <th>ID</th>
                 <th>Name</th>
+                <th>Text</th>
+                <th>Tags</th>
+                <th>Comments</th>
+                <th>Likes</th>
             </tr>
         </thead>
         <tbody>
@@ -18,6 +22,20 @@
                 <tr>
                     <td>${post.id}</td>
                     <td>${post.name}</td>
+                    <td>${post.text}</td>
+                    <td>
+                        <c:forEach var="tag" items="${post.tags}">
+                            ${tag}<br/>
+                        </c:forEach>
+                    </td>
+                    <td>
+                        <c:forEach var="comment" items="${post.comments}">
+                            <div>
+                                <strong>${comment.id}</strong>: ${comment.text}
+                            </div>
+                        </c:forEach>
+                    </td>
+                    <td>${post.likes}</td>
                 </tr>
             </c:forEach>
         </tbody>

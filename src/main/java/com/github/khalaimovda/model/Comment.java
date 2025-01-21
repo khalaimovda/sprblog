@@ -15,12 +15,21 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column
     private String text;
 
-    @ManyToOne
-    @JoinColumn(name = "post_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 
     public Comment() {
+    }
+
+    @Override
+    public String toString() {
+        return "Comment{" +
+            "id=" + id +
+            ", text='" + text + '\'' +
+            '}';
     }
 }
