@@ -1,5 +1,6 @@
 package com.github.khalaimovda.config;
 
+import com.github.khalaimovda.AppConfig;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class AppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {

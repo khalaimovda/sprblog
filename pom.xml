@@ -11,6 +11,7 @@
 
   <properties>
     <java.version>21</java.version>
+    <lombok.version>1.18.36</lombok.version>
   </properties>
 
   <dependencies>
@@ -27,6 +28,48 @@
       <version>6.1.0</version>
       <scope>provided</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>2.3.232</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-core</artifactId>
+      <version>6.6.4.Final</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-jpa</artifactId>
+      <version>3.4.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jakarta.servlet.jsp.jstl</groupId>
+      <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+      <version>3.0.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.web</groupId>
+      <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+      <version>3.0.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>${lombok.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+
   </dependencies>
 
   <build>
@@ -37,6 +80,13 @@
         <version>3.13.0</version>
         <configuration>
           <release>${java.version}</release>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
 
@@ -53,7 +103,7 @@
             <properties>
               <cargo.servlet.port>8080</cargo.servlet.port>
               <cargo.jvmargs>
-                -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005
+                -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005
               </cargo.jvmargs>
             </properties>
           </configuration>
