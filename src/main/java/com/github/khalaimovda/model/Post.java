@@ -11,10 +11,7 @@ import java.util.*;
 @Table(name = "posts")
 @Getter
 @Setter
-public class Post {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Post extends BaseModel {
 
     @Column(nullable = false)
     private String name;

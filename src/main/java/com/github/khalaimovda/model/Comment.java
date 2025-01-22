@@ -9,11 +9,7 @@ import lombok.Setter;
 @Table(name = "comments")
 @Getter
 @Setter
-public class Comment {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Comment extends BaseModel {
 
     @Column
     private String text;

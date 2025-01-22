@@ -10,6 +10,7 @@
         <thead>
             <tr>
                 <th>ID</th>
+                <th>CreatedAt</th>
                 <th>Name</th>
                 <th>Text</th>
                 <th>Tags</th>
@@ -21,6 +22,7 @@
             <c:forEach var="post" items="${posts}">
                 <tr>
                     <td>${post.id}</td>
+                    <td>${post.createdAt}</td>
                     <td>${post.name}</td>
                     <td>${post.text}</td>
                     <td>
@@ -31,7 +33,9 @@
                     <td>
                         <c:forEach var="comment" items="${post.comments}">
                             <div>
-                                <strong>${comment.id}</strong>: ${comment.text}
+                                <strong>${comment.id}</strong>:
+                                ${comment.text}
+                                ${comment.createdAt}
                             </div>
                         </c:forEach>
                     </td>
