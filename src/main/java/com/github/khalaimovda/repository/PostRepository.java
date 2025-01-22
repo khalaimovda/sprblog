@@ -2,12 +2,15 @@ package com.github.khalaimovda.repository;
 
 
 import com.github.khalaimovda.model.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
-    List<Post> findByName(String name);
+
+    @EntityGraph(attributePaths = {"tags", "comments"}) // To avoid N + 1 queries
+    Page<Post> findAll(Pageable pageable);
 }

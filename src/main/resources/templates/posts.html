@@ -20,7 +20,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="post : ${posts}">
+    <tr th:each="post : ${posts.content}">
         <td th:text="${post.id}">ID</td>
         <td th:text="${post.createdAt}">CreatedAt</td>
         <td th:text="${post.name}">Name</td>
@@ -39,5 +39,29 @@
     </tr>
     </tbody>
 </table>
+
+<div>
+    <span>Show:</span>
+    <a th:class="${size == 1 ? 'active' : ''}" th:href="@{/posts(size=1, page=${posts.number})}">1</a> |
+    <a th:class="${size == 2 ? 'active' : ''}" th:href="@{/posts(size=2, page=${posts.number})}">2</a> |
+    <a th:class="${size == 5 ? 'active' : ''}" th:href="@{/posts(size=5, page=${posts.number})}">5</a>
+</div>
+
+<div th:if="${posts.totalPages > 1}" class="pagination">
+    <ul>
+        <li th:class="${posts.first ? 'disabled' : ''}">
+            <a th:href="@{/posts(page=${posts.number - 1}, size=${posts.size})}" th:if="${!posts.first}">&laquo; Prev</a>
+            <span th:if="${posts.first}">&laquo; Prev</span>
+        </li>
+        <li th:each="page : ${#numbers.sequence(0, posts.totalPages - 1)}"
+            th:class="${page == posts.number ? 'active' : ''}">
+            <a th:href="@{/posts(page=${page}, size=${posts.size})}" th:text="${page + 1}">Page</a>
+        </li>
+        <li th:class="${posts.last ? 'disabled' : ''}">
+            <a th:href="@{/posts(page=${posts.number + 1}, size=${posts.size})}" th:if="${!posts.last}">Next &raquo;</a>
+            <span th:if="${posts.last}">Next &raquo;</span>
+        </li>
+    </ul>
+</div>
 </body>
 </html>
