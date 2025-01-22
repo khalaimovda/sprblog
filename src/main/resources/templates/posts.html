@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Posts</title>
+</head>
+<body>
+<h1>List of Posts</h1>
+<table border="1">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>CreatedAt</th>
+        <th>Name</th>
+        <th>Text</th>
+        <th>Tags</th>
+        <th>Comments</th>
+        <th>Likes</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="post : ${posts}">
+        <td th:text="${post.id}">ID</td>
+        <td th:text="${post.createdAt}">CreatedAt</td>
+        <td th:text="${post.name}">Name</td>
+        <td th:text="${post.text}">Text</td>
+        <td>
+            <span th:each="tag : ${post.tags}" th:text="${tag}">Tag</span><br/>
+        </td>
+        <td>
+            <div th:each="comment : ${post.comments}">
+                <strong th:text="${comment.id}">Comment ID</strong>:
+                <span th:text="${comment.text}">Comment Text</span>
+                <span th:text="${comment.createdAt}">Comment CreatedAt</span>
+            </div>
+        </td>
+        <td th:text="${post.likes}">Likes</td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
