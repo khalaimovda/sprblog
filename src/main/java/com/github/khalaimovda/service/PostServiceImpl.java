@@ -7,10 +7,13 @@ import com.github.khalaimovda.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
+
+import static com.github.khalaimovda.specification.PostSpecification.hasTag;
 
 
 @Service
@@ -20,8 +23,11 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
 
     @Override
-    public Page<Post> getPosts(Pageable pageable) {
-        return postRepository.findAll(pageable);
+    public Page<Post> getPosts(Pageable pageable, Tag tagFilter) {
+        Specification<Post> filters = Specification
+            .where(tagFilter == null ? null : hasTag(tagFilter));
+
+        return postRepository.findAll(filters, pageable);
     }
 
     @Override

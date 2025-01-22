@@ -1,6 +1,7 @@
 package com.github.khalaimovda.controller;
 
 import com.github.khalaimovda.model.Post;
+import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,11 +27,12 @@ public class PostController {
     public String getPosts(
         @RequestParam(name="page", defaultValue = "0") int page,
         @RequestParam(name="size", defaultValue = "2") int size,
+        @RequestParam(name="tag", required = false) Tag tag,
         Model model
     ) {
         Sort sort = Sort.by("createdAt").descending();
         Pageable pageable = PageRequest.of(page, size, sort);
-        Page<Post> posts = postService.getPosts(pageable);
+        Page<Post> posts = postService.getPosts(pageable, tag);
         model.addAttribute("posts", posts);
         return "posts";
     }
