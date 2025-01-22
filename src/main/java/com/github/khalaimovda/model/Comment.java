@@ -2,11 +2,13 @@ package com.github.khalaimovda.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
 @Entity
 @Table(name = "comments")
+@NoArgsConstructor
 @Getter
 @Setter
 public class Comment extends BaseModel {
@@ -15,11 +17,8 @@ public class Comment extends BaseModel {
     private String text;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id", nullable = false)
+    @JoinColumn(name = "post_id", nullable = false, updatable = false)
     private Post post;
-
-    public Comment() {
-    }
 
     @Override
     public String toString() {

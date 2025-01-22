@@ -11,8 +11,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Set;
-
 import static com.github.khalaimovda.specification.PostSpecification.hasTag;
 
 
@@ -21,6 +19,7 @@ import static com.github.khalaimovda.specification.PostSpecification.hasTag;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
+    private final PostMapper postMapper;
 
     @Override
     public Page<Post> getPosts(Pageable pageable, Tag tagFilter) {
@@ -32,20 +31,9 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post createPost(String name) {
-        Post post = new Post();
-        post.setName(name);
-        post.setText("Some random text + " + name);
-        post.setTags(Set.of(Tag.ART, Tag.SCIENCE));
+    public Post createPost(PostCreateRequest request) {
 
-        Comment firstComment = new Comment();
-        firstComment.setText("First comment");
-        post.addComment(firstComment);
-
-        Comment secondComment = new Comment();
-        secondComment.setText("Second comment");
-        post.addComment(secondComment);
-
+        Post post = postMapper.toPost(request);
         return postRepository.save(post);
     }
 }

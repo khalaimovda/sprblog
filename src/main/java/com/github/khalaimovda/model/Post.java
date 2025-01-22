@@ -3,12 +3,14 @@ package com.github.khalaimovda.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.*;
 
 @Entity
 @Table(name = "posts")
+@NoArgsConstructor
 @Getter
 @Setter
 public class Post extends BaseModel {
@@ -42,9 +44,6 @@ public class Post extends BaseModel {
         fetch = FetchType.EAGER
     )
     private List<Comment> comments = new ArrayList<>();
-
-    public Post() {
-    }
 
     public void addComment(Comment comment) {
         comments.add(comment);
