@@ -4,6 +4,7 @@ import com.github.khalaimovda.dto.PostCreateRequest;
 import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.service.PostService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,7 +37,7 @@ public class PostController {
     }
 
     @PostMapping("")
-    public String createPost(@RequestBody PostCreateRequest body) {
+    public String createPost(@Valid @RequestBody PostCreateRequest body) {
         Post post = postService.createPost(body);
         // todo: redirect to GET posts
         return "hello";

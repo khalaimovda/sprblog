@@ -1,7 +1,7 @@
 package com.github.khalaimovda.dto;
 
 import com.github.khalaimovda.model.Tag;
-//import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +13,7 @@ import java.util.Set;
 @Setter
 public class PostCreateRequest {
 
-//    @NotNull
+    @NotNull
     private String name;
     private String text;
     private byte[] image;
