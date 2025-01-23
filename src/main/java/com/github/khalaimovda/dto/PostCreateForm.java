@@ -5,17 +5,18 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Set;
 
 @NoArgsConstructor
 @Getter
 @Setter
-public class PostCreateRequest {
+public class PostCreateForm {
 
     @NotNull
     private String name;
     private String text;
-    private byte[] image;
+    private MultipartFile image;
     private Set<Tag> tags;
 }

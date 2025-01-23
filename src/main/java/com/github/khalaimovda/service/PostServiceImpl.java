@@ -1,6 +1,6 @@
 package com.github.khalaimovda.service;
 
-import com.github.khalaimovda.dto.PostCreateRequest;
+import com.github.khalaimovda.dto.PostCreateForm;
 import com.github.khalaimovda.mapper.PostMapper;
 import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
@@ -32,8 +32,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post createPost(PostCreateRequest request) {
-        Post post = postMapper.toPost(request);
+    public Post createPost(PostCreateForm form) {
+        Post post = postMapper.toPost(form);
         return postRepository.save(post);
     }
 }

@@ -1,6 +1,6 @@
 package com.github.khalaimovda.controller;
 
-import com.github.khalaimovda.dto.PostCreateRequest;
+import com.github.khalaimovda.dto.PostCreateForm;
 import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.service.PostService;
@@ -37,9 +37,8 @@ public class PostController {
     }
 
     @PostMapping("")
-    public String createPost(@Valid @RequestBody PostCreateRequest body) {
-        Post post = postService.createPost(body);
-        // todo: redirect to GET posts
+    public String createPost(@Valid @ModelAttribute PostCreateForm form) {
+        Post post = postService.createPost(form);
         return "hello";
     }
 }
