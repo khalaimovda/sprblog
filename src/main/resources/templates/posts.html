@@ -14,6 +14,7 @@
         <th>CreatedAt</th>
         <th>Name</th>
         <th>Text</th>
+        <th>ImagePath</th>
         <th>Tags</th>
         <th>Comments</th>
         <th>Likes</th>
@@ -25,6 +26,7 @@
         <td th:text="${post.createdAt}">CreatedAt</td>
         <td th:text="${post.name}">Name</td>
         <td th:text="${post.text}">Text</td>
+        <td th:text="${post.imagePath}">Image Path</td>
         <td>
             <span th:each="tag : ${post.tags}" th:text="${tag}">Tag</span><br/>
         </td>

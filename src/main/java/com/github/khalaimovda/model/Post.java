@@ -22,9 +22,8 @@ public class Post extends BaseModel {
     @Lob
     private String text;
 
-    @Column(columnDefinition="BLOB")
-    @Lob
-    private byte[] image;
+    @Column(name = "image_path")
+    private String imagePath;
 
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private int likes;
@@ -61,6 +60,7 @@ public class Post extends BaseModel {
             "id=" + id +
             ", name='" + name + '\'' +
             ", text='" + text + '\'' +
+            ", imagePath='" + imagePath + '\'' +
             ", likes=" + likes +
             ", tags=" + tags +
             ", comments=" + comments +

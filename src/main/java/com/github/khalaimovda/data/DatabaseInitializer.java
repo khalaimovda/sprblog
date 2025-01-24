@@ -30,6 +30,8 @@ public class DatabaseInitializer {
             Post post = new Post();
             post.setName("Post " + i);
             post.setText("This is the text of post #" + i);
+            post.setImagePath(String.format("/path/to/image_%s.jpg", i));
+
             if (i == 1 || i == 3) {
                 post.setTags(Set.of(Tag.POLITICS));
             } else if (i == 2) {
@@ -37,6 +39,7 @@ public class DatabaseInitializer {
             } else {
                 post.setTags(Set.of(Tag.SCIENCE));
             }
+
             post.setLikes(10 - i);
 
             for (int j = 1; j <= 3; j++) {
