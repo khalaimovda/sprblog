@@ -26,7 +26,7 @@
         <td th:text="${post.createdAt}">CreatedAt</td>
         <td th:text="${post.name}">Name</td>
         <td th:text="${post.text}">Text</td>
-        <td th:text="${post.imagePath}">Image Path</td>
+        <td><img th:src="${post.imagePath}" alt="Post Image" /></td>-->
         <td>
             <span th:each="tag : ${post.tags}" th:text="${tag}">Tag</span><br/>
         </td>

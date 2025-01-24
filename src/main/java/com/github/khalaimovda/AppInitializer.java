@@ -23,6 +23,13 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 
     @Override
     protected void customizeRegistration(ServletRegistration.Dynamic registration) {
-        registration.setMultipartConfig(new MultipartConfigElement("/tmp"));
+        registration.setMultipartConfig(
+            new MultipartConfigElement(
+                "/tmp",
+                5 * 1024 * 1024,
+                6 * 1024 * 1024,
+                1024 * 1024
+                )
+        );
     }
 }

@@ -8,5 +8,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface PostService {
     Page<Post> getPosts(Pageable pageable, Tag tagFilter);
-    Post createPost(PostCreateForm form);
+    Post createPost(PostCreateForm form, String imagePath);
 }

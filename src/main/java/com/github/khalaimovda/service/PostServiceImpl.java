@@ -32,8 +32,8 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public Post createPost(PostCreateForm form) {
-        Post post = postMapper.toPost(form);
+    public Post createPost(PostCreateForm form, String imagePath) {
+        Post post = postMapper.toPost(form, imagePath);
         return postRepository.save(post);
     }
 }

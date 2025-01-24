@@ -16,7 +16,9 @@ public class PostCreateForm {
 
     @NotNull
     private String name;
+    @NotNull
     private String text;
+    @NotNull
     private MultipartFile image;
     private Set<Tag> tags;
 }

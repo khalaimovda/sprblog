@@ -18,11 +18,11 @@ public class Post extends BaseModel {
     @Column(nullable = false)
     private String name;
 
-    @Column
+    @Column(nullable = false)
     @Lob
     private String text;
 
-    @Column(name = "image_path")
+    @Column(name = "image_path", nullable = false)
     private String imagePath;
 
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
