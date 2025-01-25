@@ -6,10 +6,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Getter
 public enum Tag {
-    SCIENCE("science"),
-    ART("art"),
-    POLITICS("politics"),
-    RELIGION("religion");
-
-    private final String value;
+    SCIENCE,
+    ART,
+    POLITICS,
+    RELIGION;
 }

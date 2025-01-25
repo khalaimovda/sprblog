@@ -71,5 +71,10 @@ SELECT
 
 INSERT INTO post_tag (post_id, tag_id)
 SELECT
+    (SELECT id FROM posts WHERE title = 'First'),
+    (SELECT id FROM tags WHERE name = 'RELIGION');
+
+INSERT INTO post_tag (post_id, tag_id)
+SELECT
     (SELECT id FROM posts WHERE title = 'Third'),
     (SELECT id FROM tags WHERE name = 'POLITICS');

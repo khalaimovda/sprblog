@@ -8,6 +8,8 @@ import com.github.khalaimovda.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.function.Supplier;
+
 //import static com.github.khalaimovda.specification.PostSpecification.hasTag;
 
 
@@ -19,12 +21,9 @@ public class PostServiceImpl implements PostService {
 //    private final PostMapper postMapper;
 
     @Override
-    public Page<Post> getPosts(Pageable pageable, Tag tagFilter) {
-//        Specification<Post> filters = Specification
-//            .where(tagFilter == null ? null : hasTag(tagFilter));
-
-//        return postRepository.findAll(filters, pageable);
-        return postRepository.findAll(pageable);
+    public Page<Post> getPosts(Pageable pageable, Tag tag) {
+        Supplier<Tag> tagFilter = tag != null ? () -> tag : null;
+        return postRepository.findAll(pageable, tagFilter);
     }
 
 //    @Override

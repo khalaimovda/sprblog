@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,5 +19,7 @@ public class Post extends BaseModel {
     private String text;
     private String imagePath;
     private int likes;
-    // todo: comments; tags
+    private Set<Tag> tags;
+
+    // todo: comments
 }
