@@ -4,67 +4,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Posts</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
+
 <body>
-<h1>List of Posts</h1>
-<table border="1">
+<h1>Посты</h1>
+<button class="btn-add" onclick="toggleForm()">Создать пост</button>
+
+<table>
     <thead>
     <tr>
-        <th>ID</th>
-        <th>CreatedAt</th>
-        <th>Title</th>
-        <th>Text</th>
-        <th>ImagePath</th>
-        <th>Tags</th>
-        <th>Comments</th>
-        <th>Likes</th>
+        <th>Заголовок</th>
+        <th>Изображение</th>
+        <th>Текст</th>
+        <th>Теги</th>
+        <th>Комментарии</th>
+        <th>Лайки</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="post : ${posts.content}">
-        <td th:text="${post.id}">ID</td>
-        <td th:text="${post.createdAt}">CreatedAt</td>
-        <td th:text="${post.title}">Title</td>
-        <td th:text="${post.text}">Text</td>
-        <td><img th:src="${post.imagePath}" alt="Post Image" /></td>-->
+        <td th:text="${post.title}"></td>
+        <td><img th:src="${post.imagePath}" alt="Post Image" /></td>
+        <td th:text="${post.text}"></td>
         <td>
-            <span th:each="tag : ${post.tags}" th:text="${tag}">Tag</span><br/>
+            <span th:each="tag : ${post.tags}" th:text="${tag}"></span><br/>
         </td>
-        <td th:text="${post.comments}">Comments</td>
-        <td>
-            <div th:each="comment : ${post.comments}">
-                <strong th:text="${comment.id}">Comment ID</strong>:
-                <span th:text="${comment.text}">Comment Text</span>
-                <span th:text="${comment.createdAt}">Comment CreatedAt</span>
-            </div>
-        </td>
-        <td th:text="${post.likes}">Likes</td>
+        <td th:text="${post.comments}"></td>
+        <td th:text="${post.likes}"></td>
     </tr>
     </tbody>
 </table>
 
-<div>
-    <span>Show:</span>
-    <a th:class="${size == 1 ? 'active' : ''}" th:href="@{/posts(size=1, page=${posts.number})}">1</a> |
-    <a th:class="${size == 2 ? 'active' : ''}" th:href="@{/posts(size=2, page=${posts.number})}">2</a> |
-    <a th:class="${size == 5 ? 'active' : ''}" th:href="@{/posts(size=5, page=${posts.number})}">5</a>
+<div class="form-container" style="display: none;" id="userForm">
+    <h2>Добавить пользователя</h2>
+    <form th:action="@{/posts}" method="POST">
+        <label for="title">Заголовок:</label>
+        <input type="text" id="title" name="title" required>
+
+        <label for="text">Текст:</label>
+        <textarea id="text" name="text" required></textarea>
+
+        <label for="image">Изображение:</label>
+        <input type="file" id="image" accept="image/*" required>
+
+        <fieldset>
+            <legend>Теги:</legend>
+            <label>
+                <input type="checkbox" name="tags" value="SCIENCE"> Наука
+            </label>
+            <br>
+            <label>
+                <input type="checkbox" name="tags" value="ART"> Искусство
+            </label>
+            <br>
+            <label>
+                <input type="checkbox" name="tags" value="POLITICS"> Политика
+            </label>
+            <br>
+            <label>
+                <input type="checkbox" name="tags" value="RELIGION"> Религия
+            </label>
+            <br><br>
+        </fieldset>
+
+        <button type="submit">Создать</button>
+    </form>
 </div>
 
-<div th:if="${posts.totalPages > 1}" class="pagination">
-    <ul>
-        <li th:class="${posts.first ? 'disabled' : ''}">
-            <a th:href="@{/posts(page=${posts.number - 1}, size=${posts.size})}" th:if="${!posts.first}">&laquo; Prev</a>
-            <span th:if="${posts.first}">&laquo; Prev</span>
-        </li>
-        <li th:each="page : ${#numbers.sequence(0, posts.totalPages - 1)}"
-            th:class="${page == posts.number ? 'active' : ''}">
-            <a th:href="@{/posts(page=${page}, size=${posts.size})}" th:text="${page + 1}">Page</a>
-        </li>
-        <li th:class="${posts.last ? 'disabled' : ''}">
-            <a th:href="@{/posts(page=${posts.number + 1}, size=${posts.size})}" th:if="${!posts.last}">Next &raquo;</a>
-            <span th:if="${posts.last}">Next &raquo;</span>
-        </li>
-    </ul>
-</div>
+<script th:src="@{/js/scripts.js}"></script>
+
 </body>
 </html>
