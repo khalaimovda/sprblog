@@ -1,0 +1,282 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: auto;
+  padding: auto;
+  width: 750px;
+  max-width: 750px;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
+main {
+  width: 100%;
+}
+
+header {
+  width: 100%;
+  height: 70px;
+  position: sticky;
+  padding-top: 10px;
+  padding-bottom: 30px;
+  top: 0;
+  background-color: rgb(242, 242, 242);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+button {
+  cursor: pointer;
+}
+
+.new-post-div {
+  width: 100%;
+  padding-left: 40px;
+  text-align: left;
+}
+
+.tag-filter-div {
+  width: 100%;
+  padding-right: 40px;
+  text-align: right;
+}
+
+.new-post-btn {
+  padding: 10px 20px;
+  background-color: white;
+  border: 1px black solid;
+}
+
+select {
+  padding: 10px 5px;
+}
+
+.posts {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.post {
+  width: 100%;
+  border: 2px grey solid;
+  margin-bottom: 20px;
+}
+
+.title {
+  padding: 15px;
+  width: 100%;
+  border-bottom: 2px grey solid;
+  text-align: center;
+}
+
+.image {
+  width: 100%;
+}
+
+.image img {
+  width: 100%;
+  height: auto;
+}
+
+
+.text {
+  border-top: 2px grey solid;
+  width: 100%;
+  padding: 10px 10px 0 10px;
+  text-align: left;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+          line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.comments-likes {
+  margin-top: 10px;
+  border-top: 2px grey solid;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.comments {
+  border-right: 2px grey solid;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+}
+
+.likes {
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+}
+
+
+/* Modal window */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  width: 90%;
+}
+
+.modal-header {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+/* Post create form */
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+form label {
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+form input,
+form textarea {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  resize: none;
+}
+
+form button {
+  background-color: #333;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+form button:hover {
+  background-color: #555;
+}
+
+.tags {
+  border-top: 2px grey solid;
+  padding: 15px 10px 10px 10px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tag {
+  width: 100px;
+  height: 30px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  background-color: rgb(242, 242, 242);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.tag.selected {
+  background-color: #333;
+  color: white;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+
+/* Pagination */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+}
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pagination li {
+  margin: 0 5px;
+}
+
+.page-button {
+  text-decoration: none;
+  color: #333;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  background-color: white;
+  transition: background-color 0.2s, border-color 0.2s;
+  display: inline-block;
+}
+
+.page-button:hover {
+  background-color: #e0e0e0;
+}
+
+.pagination .active {
+  color: white;
+  background-color: #333;
+  border-color: #333;
+  cursor: default;
+}
+
+.page-size {
+  display: flex;
+  align-items: center;
+}
+
+.page-size label {
+  margin-right: 5px;
+}
+
+.page-size select {
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+}

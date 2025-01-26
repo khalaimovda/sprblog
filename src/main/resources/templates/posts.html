@@ -3,76 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/posts-styles.css}" />
     <title>Posts</title>
-    <link rel="stylesheet" th:href="@{/css/styles.css}" />
 </head>
 
 <body>
-<h1>Посты</h1>
-<button class="btn-add" onclick="toggleForm()">Создать пост</button>
 
-<table>
-    <thead>
-    <tr>
-        <th>Заголовок</th>
-        <th>Изображение</th>
-        <th>Текст</th>
-        <th>Теги</th>
-        <th>Комментарии</th>
-        <th>Лайки</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="post : ${posts.content}">
-        <td th:text="${post.title}"></td>
-        <td><img th:src="${post.imagePath}" alt="Post Image" /></td>
-        <td th:text="${post.text}"></td>
-        <td>
-            <span th:each="tag : ${post.tags}" th:text="${tag}"></span><br/>
-        </td>
-        <td th:text="${post.comments}"></td>
-        <td th:text="${post.likes}"></td>
-    </tr>
-    </tbody>
-</table>
+<header>
+    <div class="new-post-div"><button class="new-post-btn" id="openModal">Создать пост</button></div>
+    <div class="tag-filter-div">
+        <select id="tagFilter">
+            <option value="">Все теги</option>
+            <option value="SCIENCE">Наука</option>
+            <option value="ART">Искусство</option>
+            <option value="POLITICS">Политика</option>
+            <option value="RELIGION">Религия</option>
+        </select>
+    </div>
+</header>
 
-<div class="form-container" style="display: none;" id="userForm">
-    <h2>Добавить пользователя</h2>
-    <form th:action="@{/posts}" method="POST">
-        <label for="title">Заголовок:</label>
-        <input type="text" id="title" name="title" required>
+<main>
+    <div class="posts">
+        <div class="post" th:each="post : ${page.content}">
+            <div class="title">
+                <h2 th:text="${post.title}">Название поста</h2>
+            </div>
+            <div class="image">
+                <img th:src="${post.imagePath}" alt="Post Image">
+            </div>
+            <div class="text" th:text="${post.text}">Текст поста</div>
+            <div class="tags">
+                <div class="tag" th:each="tag : ${post.tags}" th:text="${tag}">Тег</div>
+            </div>
+            <div class="comments-likes">
+                <div class="comments">
+                    Комментариев: <span th:text="${post.comments}">0</span>
+                </div>
+                <div class="likes">
+                    Лайков: <span th:text="${post.likes}">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <label for="text">Текст:</label>
-        <textarea id="text" name="text" required></textarea>
+    <div class="pagination-container">
+        <ul class="pagination" th:if="${page.totalPages > 1}">
+            <li th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}">
+                <button
+                    class="page-button"
+                    th:attr="data-page=${i}"
+                    th:text="${i + 1}"
+                    th:classappend="${i == page.number} ? 'active' : ''">
+                </button>
+            </li>
+        </ul>
 
-        <label for="image">Изображение:</label>
-        <input type="file" id="image" accept="image/*" required>
+        <div class="page-size">
+            <label for="pageSize">Постов на странице:</label>
+            <select id="pageSize">
+                <option value="10" selected>10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+    </div>
+</main>
 
-        <fieldset>
-            <legend>Теги:</legend>
-            <label>
-                <input type="checkbox" name="tags" value="SCIENCE"> Наука
-            </label>
-            <br>
-            <label>
-                <input type="checkbox" name="tags" value="ART"> Искусство
-            </label>
-            <br>
-            <label>
-                <input type="checkbox" name="tags" value="POLITICS"> Политика
-            </label>
-            <br>
-            <label>
-                <input type="checkbox" name="tags" value="RELIGION"> Религия
-            </label>
-            <br><br>
-        </fieldset>
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-header">Создать новый пост</div>
+        <form id="postForm" enctype="multipart/form-data" method="post" th:action="@{/posts}">
+            <label for="title">Заголовок</label>
+            <input type="text" id="title" name="title" placeholder="Enter post title" required>
 
-        <button type="submit">Создать</button>
-    </form>
+            <label for="text">Текст</label>
+            <textarea id="text" name="text" rows="5" placeholder="Enter post text" required></textarea>
+
+            <label for="image">Изображение</label>
+            <input type="file" id="image" name="image" accept="image/*" required>
+
+            <label>Теги</label>
+            <div class="tags" id="tags">
+                <div class="tag" data-tag="SCIENCE">Наука</div>
+                <div class="tag" data-tag="ART">Искусство</div>
+                <div class="tag" data-tag="POLITICS">Политика</div>
+                <div class="tag" data-tag="RELIGION">Религия</div>
+            </div>
+
+            <button type="submit">Создать</button>
+        </form>
+    </div>
 </div>
 
-<script th:src="@{/js/scripts.js}"></script>
+<script th:src="@{/js/posts-scripts.js}"></script>
 
 </body>
 </html>

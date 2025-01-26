@@ -27,27 +27,25 @@ public class PostController {
     @GetMapping
     public String getPosts(
         @RequestParam(name="page", defaultValue = "0") int page,
-        @RequestParam(name="size", defaultValue = "20") int size,
+        @RequestParam(name="size", defaultValue = "10") int size,
         @RequestParam(name="tag", required = false) Tag tag,
         Model model
     ) {
         Pageable pageable = Pageable.of(page, size);
         Page<Post> posts = postService.getPosts(pageable, tag);
 //        posts.forEach(post -> post.setImagePath(imageService.getImageSrcPath(post.getImagePath())));
-        model.addAttribute("posts", posts);
+        model.addAttribute("page", posts);
         return "posts";
     }
 
 //    @PostMapping
-//    public String createPost(@Valid @ModelAttribute PostCreateForm form) {
+//    public ResponseEntity<Void> createPost(@Valid @ModelAttribute PostCreateForm form) {
 //        try {
 //            String imagePath = imageService.saveImage(form.getImage());
 //            postService.createPost(form, imagePath);
 //        } catch (IOException e) {
 //            throw new RuntimeException(e);
-//            // todo: error page
 //        }
-//        // todo: redirect to getPosts()
-//        return "hello";
+//        return ResponseEntity.status(HttpStatus.CREATED).build();
 //    }
 }
