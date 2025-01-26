@@ -12,7 +12,7 @@
     <tr>
         <th>ID</th>
         <th>CreatedAt</th>
-        <th>Name</th>
+        <th>Title</th>
         <th>Text</th>
         <th>ImagePath</th>
         <th>Tags</th>
@@ -24,12 +24,13 @@
     <tr th:each="post : ${posts.content}">
         <td th:text="${post.id}">ID</td>
         <td th:text="${post.createdAt}">CreatedAt</td>
-        <td th:text="${post.name}">Name</td>
+        <td th:text="${post.title}">Title</td>
         <td th:text="${post.text}">Text</td>
         <td><img th:src="${post.imagePath}" alt="Post Image" /></td>-->
         <td>
             <span th:each="tag : ${post.tags}" th:text="${tag}">Tag</span><br/>
         </td>
+        <td th:text="${post.comments}">Comments</td>
         <td>
             <div th:each="comment : ${post.comments}">
                 <strong th:text="${comment.id}">Comment ID</strong>:

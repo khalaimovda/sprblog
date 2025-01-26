@@ -32,7 +32,7 @@ public class JdbcNativePostRepository implements PostRepository {
         String query = String.format("""
             WITH post_tags AS (
                 SELECT
-                    p.id as post_id,
+                    p.id AS post_id,
                     COALESCE(
                         ARRAY_AGG(t.name) FILTER (WHERE t.name IS NOT NULL),
                         ARRAY[]
@@ -41,16 +41,25 @@ public class JdbcNativePostRepository implements PostRepository {
                 LEFT JOIN post_tag AS pt ON p.id = pt.post_id
                 LEFT JOIN tags AS t ON pt.tag_id = t.id
                 GROUP BY p.id
+            ),
+            post_comments AS (
+                SELECT
+                    p.id AS post_id,
+                    COUNT(c.id) AS comment_count
+                FROM posts AS p
+                LEFT JOIN comments AS c ON p.id = c.post_id
+                GROUP BY p.id
             )
             SELECT
                 p.title,
                 p.text,
                 p.image_path,
                 p.likes,
-                pt.tags
+                pt.tags,
+                pc.comment_count
             FROM posts AS p
             JOIN post_tags AS pt ON p.id = pt.post_id
-            GROUP BY p.title, p.text, p.image_path, p.likes
+            JOIN post_comments AS pc ON p.id = pc.post_id
             %s
             ORDER BY p.created_at DESC
             LIMIT ? OFFSET ?
@@ -58,7 +67,6 @@ public class JdbcNativePostRepository implements PostRepository {
             tagFilterStatement
         );
 
-        // todo: comments -- count of comments
         List<Post> posts = jdbcTemplate.query(
             query,
             (rs, rowNum) -> {
@@ -72,7 +80,8 @@ public class JdbcNativePostRepository implements PostRepository {
                     rs.getString("text"),
                     rs.getString("image_path"),
                     rs.getInt("likes"),
-                    tags
+                    tags,
+                    rs.getInt("comment_count")
                 );
             },
             pageable.getPageSize(), pageable.getOffset()

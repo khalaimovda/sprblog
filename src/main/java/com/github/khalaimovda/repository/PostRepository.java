@@ -11,6 +11,5 @@ import java.util.function.Supplier;
 
 @Repository
 public interface PostRepository {
-
     Page<Post> findAll(Pageable pageable, Supplier<Tag> tagFilter);
 }
