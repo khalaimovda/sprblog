@@ -21,6 +21,7 @@ tagFilter.addEventListener('change', () => {
   const currentUrl = new URL(window.location.href);
   const params = currentUrl.searchParams;
 
+  params.set('page', 0); // Request first page if we changed tag filter
   if (newTagFilterValue === '') {
     params.delete('tag');
   } else {
