@@ -18,12 +18,15 @@ import java.util.function.Supplier;
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
+    private final ImageService imageService;
 //    private final PostMapper postMapper;
 
     @Override
     public Page<Post> getPosts(Pageable pageable, Tag tag) {
         Supplier<Tag> tagFilter = tag != null ? () -> tag : null;
-        return postRepository.findAll(pageable, tagFilter);
+        Page<Post> posts = postRepository.findAll(pageable, tagFilter);
+        posts.content().forEach(post -> post.setImagePath(imageService.getImageSrcPath(post.getImagePath())));
+        return posts;
     }
 
 //    @Override
