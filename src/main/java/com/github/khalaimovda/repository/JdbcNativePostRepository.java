@@ -1,13 +1,18 @@
 package com.github.khalaimovda.repository;
 
+import com.github.khalaimovda.dto.PostSummary;
 import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
 import com.github.khalaimovda.pagination.Pageable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -21,7 +26,7 @@ public class JdbcNativePostRepository implements PostRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Page<Post> findAll(Pageable pageable, Supplier<Tag> tagFilter) {
+    public Page<PostSummary> findAll(Pageable pageable, Supplier<Tag> tagFilter) {
 
         String tagFilterStatement = tagFilter != null ?
             String.format("WHERE '%s' = ANY(pt.tags)", tagFilter.get().name())
@@ -67,7 +72,7 @@ public class JdbcNativePostRepository implements PostRepository {
         );
 
         int[] totalRecords = new int[1];
-        List<Post> posts = jdbcTemplate.query(
+        List<PostSummary> posts = jdbcTemplate.query(
             query,
             (rs, rowNum) -> {
                 totalRecords[0] = rs.getInt("total");
@@ -78,7 +83,7 @@ public class JdbcNativePostRepository implements PostRepository {
                     .map(Tag::valueOf)
                     .collect(Collectors.toSet());
 
-                return new Post(
+                return new PostSummary(
                     rs.getString("title"),
                     rs.getString("text"),
                     rs.getString("image_path"),
@@ -92,5 +97,35 @@ public class JdbcNativePostRepository implements PostRepository {
 
         int totalPages = (int) Math.ceil((double) totalRecords[0] / pageable.getPageSize());
         return Page.of(pageable.getPageNumber(), totalPages, posts);
+    }
+
+    @Override
+    @Transactional
+    public void create(Post post) {
+
+        // Create new post
+        GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+        String insertPostQuery = "INSERT INTO posts (title, text, image_path) VALUES(?, ?, ?);";
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(
+                insertPostQuery,
+                Statement.RETURN_GENERATED_KEYS
+            );
+            preparedStatement.setString(1, post.getTitle());
+            preparedStatement.setString(2, post.getText());
+            preparedStatement.setString(3, post.getImagePath());
+            return preparedStatement;
+        }, generatedKeyHolder);
+        Long postId = (Long) generatedKeyHolder.getKeyList().get(0).get("ID");
+
+        // Link post to its tags
+        String tagQuerySet = "(" +
+            String.join(",", post.getTags().stream().map(tag -> "'" + tag.name() + "'").toList()) +
+            ")";
+        String linkTagsQuery =
+            "INSERT INTO post_tag (post_id, tag_id) " +
+            "SELECT ?, id FROM tags WHERE name IN " +
+            tagQuerySet;
+        jdbcTemplate.update(linkTagsQuery, postId);
     }
 }

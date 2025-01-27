@@ -14,8 +14,8 @@ public interface PostMapper {
     @Mappings({
         @Mapping(target = "id", ignore = true),
         @Mapping(target = "createdAt", ignore = true),
-        @Mapping(target = "likes", ignore = true),
-        @Mapping(target = "comments", ignore = true),
+        @Mapping(target = "likes",  constant = "0"),
+        @Mapping(target = "comments", expression = "java(new java.util.HashSet<>())"),
         @Mapping(target = "imagePath", source = "imagePath")
     })
     Post toPost(PostCreateForm form, String imagePath);

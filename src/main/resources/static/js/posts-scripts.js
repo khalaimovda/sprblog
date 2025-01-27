@@ -108,10 +108,8 @@ postForm.addEventListener('submit', (event) => {
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
-      return response.json();
     })
-    .then(data => {
-      console.log('Success:', data);
+    .then(() => {
       closeModal();
       postForm.reset();
 
@@ -120,7 +118,7 @@ postForm.addEventListener('submit', (event) => {
     })
     .catch(error => {
       console.error('Error:', error);
-      alert('Post creation errror. See JS console');
+      alert('Post creation error. See JS console');
     });
 
   event.preventDefault();

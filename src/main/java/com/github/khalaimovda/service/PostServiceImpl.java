@@ -1,5 +1,8 @@
 package com.github.khalaimovda.service;
 
+import com.github.khalaimovda.dto.PostCreateForm;
+import com.github.khalaimovda.dto.PostSummary;
+import com.github.khalaimovda.mapper.PostMapper;
 import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
@@ -8,9 +11,8 @@ import com.github.khalaimovda.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.function.Supplier;
-
-//import static com.github.khalaimovda.specification.PostSpecification.hasTag;
 
 
 @Service
@@ -19,22 +21,27 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final ImageService imageService;
-//    private final PostMapper postMapper;
+    private final PostMapper postMapper;
 
     @Override
-    public Page<Post> getPosts(Pageable pageable, Tag tag) {
+    public Page<PostSummary> getPosts(Pageable pageable, Tag tag) {
         Supplier<Tag> tagFilter = tag != null ? () -> tag : null;
-        Page<Post> posts = postRepository.findAll(pageable, tagFilter);
+        Page<PostSummary> posts = postRepository.findAll(pageable, tagFilter);
         posts.content().forEach(post -> post.setImagePath(imageService.getImageSrcPath(post.getImagePath())));
         return posts;
     }
 
-//    @Override
-//    @Transactional
-//    public Post createPost(PostCreateForm form, String imagePath) {
-//        Post post = postMapper.toPost(form, imagePath);
-//        return postRepository.save(post);
-//    }
+    @Override
+    public void createPost(PostCreateForm form) {
+        String imagePath;
+        try {
+            imagePath = imageService.saveImage(form.getImage());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        Post post = postMapper.toPost(form, imagePath);
+        postRepository.create(post);
+    }
 
 
 //    @Override

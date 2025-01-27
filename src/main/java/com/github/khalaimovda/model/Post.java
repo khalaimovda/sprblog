@@ -20,5 +20,5 @@ public class Post extends BaseModel {
     private String imagePath;
     private int likes;
     private Set<Tag> tags;
-    private int comments;
+    private Set<Comment> comments;
 }
