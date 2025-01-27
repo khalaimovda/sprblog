@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
 
 
@@ -20,5 +21,5 @@ public class Post extends BaseModel {
     private String imagePath;
     private int likes;
     private Set<Tag> tags;
-    private Set<Comment> comments;
+    private List<Comment> comments;
 }

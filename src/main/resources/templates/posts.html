@@ -14,10 +14,10 @@
     <div class="tag-filter-div">
         <select id="tagFilter">
             <option value="">Все теги</option>
-            <option value="SCIENCE">Наука</option>
-            <option value="ART">Искусство</option>
-            <option value="POLITICS">Политика</option>
-            <option value="RELIGION">Религия</option>
+            <option value="SCIENCE">SCIENCE</option>
+            <option value="ART">ART</option>
+            <option value="POLITICS">POLITICS</option>
+            <option value="RELIGION">RELIGION</option>
         </select>
     </div>
 </header>
@@ -29,7 +29,7 @@
                 <h2 th:text="${post.title}">Название поста</h2>
             </div>
             <div class="image">
-                <img th:src="${post.imagePath}" alt="Post Image">
+                <img th:src="@{'/' + ${post.imagePath}}" alt="Post Image">
             </div>
             <div class="text" th:text="${post.text}">Текст поста</div>
             <div class="tags">
@@ -84,10 +84,10 @@
 
             <label>Теги</label>
             <div class="tags" id="tags">
-                <div class="tag" data-tag="SCIENCE">Наука</div>
-                <div class="tag" data-tag="ART">Искусство</div>
-                <div class="tag" data-tag="POLITICS">Политика</div>
-                <div class="tag" data-tag="RELIGION">Религия</div>
+                <div class="tag" data-tag="SCIENCE">SCIENCE</div>
+                <div class="tag" data-tag="ART">ART</div>
+                <div class="tag" data-tag="POLITICS">POLITICS</div>
+                <div class="tag" data-tag="RELIGION">RELIGION</div>
             </div>
 
             <button type="submit">Создать</button>

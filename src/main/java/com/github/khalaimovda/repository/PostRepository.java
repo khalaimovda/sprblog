@@ -14,4 +14,5 @@ import java.util.function.Supplier;
 public interface PostRepository {
     Page<PostSummary> findAll(Pageable pageable, Supplier<Tag> tagFilter);
     void create(Post post);
+    Post findById(long id);
 }

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/css/post-styles.css}" />
+    <title>Post</title>
+</head>
+
+<body>
+
+<header>
+    <div class="new-comment-div"><button class="new-comment-btn" id="addComment">Добавить комментарий</button></div>
+</header>
+
+<main>
+    <div class="post">
+        <div id="postId" th:text="${post.id}" hidden></div>
+        <div class="title" id="actualTitle">
+            <h2 th:text="${post.title}">Название поста</h2>
+        </div>
+        <div class="image">
+            <img th:src="@{'/' + ${post.imagePath}}" alt="Post Image">
+        </div>
+        <div class="text" id="actualText" th:text="${post.text}">Текст поста</div>
+        <div class="tags-likes">
+            <div class="tags" id="actualTags">
+                <div class="tag" th:each="tag : ${post.tags}" th:text="${tag}">Тег</div>
+            </div>
+            <div class="likes"><button>Лайков: !0!</button></div>
+        </div>
+
+        <div class="edit-delete">
+            <div class="edit" id="editPost"><button>Редактировать</button></div>
+            <div class="delete"><button>Удалить</button></div>
+        </div>
+
+        <div class="comments">
+            <div class="comment" th:each="comment : ${post.comments}">
+                <div class="comment-id"  th:text="${comment.id}" hidden></div>
+                <div class="comment-text editable" th:text="${comment.text}">Текст комментария</div>
+                <div class="comment-delete">
+                    <button>Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-post" id="modalPost">
+            <form id="postForm" enctype="multipart/form-data" method="patch" th:action="@{/posts/{post_id}(post_id=${post.id})}">
+                <label for="title">Заголовок</label>
+                <input type="text" id="title" name="title" placeholder="Enter post title" required>
+
+                <label for="text">Текст</label>
+                <textarea id="postFormText" name="text" rows="5" placeholder="Enter post text" required></textarea>
+
+                <label for="image">Изображение</label>
+                <input type="file" id="image" name="image" accept="image/*">
+
+                <label>Теги</label>
+                <div class="tags" id="tags">
+                    <div class="tag" data-tag="SCIENCE">SCIENCE</div>
+                    <div class="tag" data-tag="ART">ART</div>
+                    <div class="tag" data-tag="POLITICS">POLITICS</div>
+                    <div class="tag" data-tag="RELIGION">RELIGION</div>
+                </div>
+
+                <button type="submit">Обновить</button>
+            </form>
+        </div>
+
+        <div class="modal-comment" id="modalComment">
+            <div class="modal-header">Новый комментарий</div>
+            <form id="commentForm" enctype="multipart/form-data" method="post" th:action="@{/posts/1/comments}">
+                <textarea id="text" name="text" rows="5" placeholder="Enter comment text" required></textarea>
+                <button type="submit">Добавить</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<script th:src="@{/js/post-scripts.js}"></script>
+
+</body>
+
+</html>

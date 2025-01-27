@@ -9,7 +9,9 @@ import com.github.khalaimovda.pagination.Page;
 import com.github.khalaimovda.pagination.Pageable;
 import com.github.khalaimovda.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.function.Supplier;
@@ -43,23 +45,14 @@ public class PostServiceImpl implements PostService {
         postRepository.create(post);
     }
 
+    @Override
+    public Post getPostById(long id) {
+        Post post = postRepository.findById(id);
+        if (post == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Post with id %s not found", id));
+        }
+        post.setImagePath(imageService.getImageSrcPath(post.getImagePath()));
+        return post;
+    }
 
-//    @Override
-//    @Transactional
-//    public Post createPost(PostCreateRequest createRequest) {
-//        Post post = new Post();
-//        post.setName(name);
-//        post.setText("Some random text + " + name);
-//        post.setTags(Set.of(Tag.ART, Tag.SCIENCE));
-//
-//        Comment firstComment = new Comment();
-//        firstComment.setText("First comment");
-//        post.addComment(firstComment);
-//
-//        Comment secondComment = new Comment();
-//        secondComment.setText("Second comment");
-//        post.addComment(secondComment);
-//
-//        return postRepository.save(post);
-//    }
 }

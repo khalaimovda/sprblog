@@ -41,4 +41,11 @@ public class PostController {
         postService.createPost(form);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @GetMapping("/{id}")
+    public String getPostById(@PathVariable(name = "id") Long id, Model model) {
+        Post post = postService.getPostById(id);
+        model.addAttribute("post", post);
+        return "post";
+    }
 }

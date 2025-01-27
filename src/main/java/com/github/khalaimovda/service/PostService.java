@@ -11,4 +11,5 @@ import com.github.khalaimovda.pagination.Pageable;
 public interface PostService {
     Page<PostSummary> getPosts(Pageable pageable, Tag tagFilter);
     void createPost(PostCreateForm form);
+    Post getPostById(long id);
 }

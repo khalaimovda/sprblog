@@ -1,13 +1,16 @@
 package com.github.khalaimovda.repository;
 
 import com.github.khalaimovda.dto.PostSummary;
+import com.github.khalaimovda.model.Comment;
 import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
 import com.github.khalaimovda.pagination.Pageable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -127,5 +130,72 @@ public class JdbcNativePostRepository implements PostRepository {
             "SELECT ?, id FROM tags WHERE name IN " +
             tagQuerySet;
         jdbcTemplate.update(linkTagsQuery, postId);
+    }
+
+    @Override
+    public @Nullable Post findById(long id) {
+
+        Post post;
+        String selectPostQuery = """
+            SELECT
+                p.title,
+                p.text,
+                p.image_path,
+                p.likes,
+                COALESCE(
+                    ARRAY_AGG(t.name) FILTER (WHERE t.name IS NOT NULL),
+                    ARRAY[]
+                ) AS tags
+            FROM posts AS p
+            LEFT JOIN post_tag AS pt ON p.id = pt.post_id
+            LEFT JOIN tags AS t ON pt.tag_id = t.id
+            WHERE p.id = ?
+            GROUP BY p.id
+        """;
+        try {
+            post = jdbcTemplate.queryForObject(
+                selectPostQuery,
+                (rs, rowNum) -> {
+                    Object sqlTags = rs.getArray("tags").getArray();
+                    Set<Tag> tags = Arrays.stream((Object[]) sqlTags)
+                        .map(Object::toString)
+                        .map(Tag::valueOf)
+                        .collect(Collectors.toSet());
+
+                    return new Post(
+                        rs.getString("title"),
+                        rs.getString("text"),
+                        rs.getString("image_path"),
+                        rs.getInt("likes"),
+                        tags,
+                        List.of()
+                    );
+                },
+                id
+            );
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+
+        String selectCommentsQuery = """
+            SELECT c.id, c.text
+            FROM  comments AS c
+            JOIN posts AS p ON c.post_id = p.id
+            WHERE p.id = ?
+            ORDER BY c.created_at DESC;
+        """;
+        List<Comment> comments = jdbcTemplate.query(
+            selectCommentsQuery,
+            (rs, rowNum) -> {
+                Comment comment = new Comment();
+                comment.setId(rs.getLong("id"));
+                comment.setText(rs.getString("text"));
+                return comment;
+            },
+            id
+        );
+
+        post.setComments(comments);
+        return post;
     }
 }
