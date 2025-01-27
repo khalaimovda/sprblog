@@ -35,9 +35,9 @@ INSERT INTO tags (name) VALUES ('POLITICS');
 INSERT INTO tags (name) VALUES ('RELIGION');
 ---
 
-INSERT INTO posts (title, text, image_path) VALUES('First', 'First text', 'first_image.jpg');
-INSERT INTO posts (title, text, image_path) VALUES('Second', 'Second text', 'second_image.jpg');
-INSERT INTO posts (title, text, image_path) VALUES('Third', 'Third text', 'third_image.jpg');
+INSERT INTO posts (title, text, image_path) VALUES('First', 'First text', 'x_image.png');
+INSERT INTO posts (title, text, image_path) VALUES('Second', 'Second text', 'x_image.png');
+INSERT INTO posts (title, text, image_path) VALUES('Third', 'Third text', 'x_image.png');
 
 ---
 
