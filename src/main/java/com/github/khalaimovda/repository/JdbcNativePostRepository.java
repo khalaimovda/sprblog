@@ -1,6 +1,8 @@
 package com.github.khalaimovda.repository;
 
+import com.github.khalaimovda.dto.PostCreateDto;
 import com.github.khalaimovda.dto.PostSummary;
+import com.github.khalaimovda.dto.PostUpdateContentDto;
 import com.github.khalaimovda.model.Comment;
 import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
@@ -9,13 +11,10 @@ import com.github.khalaimovda.pagination.Pageable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -29,7 +28,7 @@ public class JdbcNativePostRepository implements PostRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Page<PostSummary> findAll(Pageable pageable, Supplier<Tag> tagFilter) {
+    public Page<PostSummary> findAllSummariesPageable(Pageable pageable, Supplier<Tag> tagFilter) {
 
         String tagFilterStatement = tagFilter != null ?
             String.format("WHERE '%s' = ANY(pt.tags)", tagFilter.get().name())
@@ -104,39 +103,23 @@ public class JdbcNativePostRepository implements PostRepository {
 
     @Override
     @Transactional
-    public void create(Post post) {
-
+    public void create(PostCreateDto dto) {
         // Create new post
-        GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
-        String insertPostQuery = "INSERT INTO posts (title, text, image_path) VALUES(?, ?, ?);";
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                insertPostQuery,
-                Statement.RETURN_GENERATED_KEYS
-            );
-            preparedStatement.setString(1, post.getTitle());
-            preparedStatement.setString(2, post.getText());
-            preparedStatement.setString(3, post.getImagePath());
-            return preparedStatement;
-        }, generatedKeyHolder);
-        Long postId = (Long) generatedKeyHolder.getKeyList().get(0).get("ID");
+        Long postId = jdbcTemplate.queryForObject(
+            "SELECT id FROM FINAL TABLE ( INSERT INTO posts (title, text, image_path) VALUES(?, ?, ?))",
+            Long.class,
+            dto.getTitle(), dto.getText(), dto.getImagePath()
+        );
 
         // Link post to its tags
-        String tagQuerySet = "(" +
-            String.join(",", post.getTags().stream().map(tag -> "'" + tag.name() + "'").toList()) +
-            ")";
-        String linkTagsQuery =
-            "INSERT INTO post_tag (post_id, tag_id) " +
-            "SELECT ?, id FROM tags WHERE name IN " +
-            tagQuerySet;
-        jdbcTemplate.update(linkTagsQuery, postId);
+        addTags(postId, dto.getTags());
     }
 
     @Override
     public @Nullable Post findById(long id) {
 
         Post post;
-        String selectPostQuery = """
+        String query = """
             SELECT
                 p.title,
                 p.text,
@@ -154,7 +137,7 @@ public class JdbcNativePostRepository implements PostRepository {
         """;
         try {
             post = jdbcTemplate.queryForObject(
-                selectPostQuery,
+                query,
                 (rs, rowNum) -> {
                     Object sqlTags = rs.getArray("tags").getArray();
                     Set<Tag> tags = Arrays.stream((Object[]) sqlTags)
@@ -177,25 +160,77 @@ public class JdbcNativePostRepository implements PostRepository {
             return null;
         }
 
-        String selectCommentsQuery = """
+        List<Comment> comments = findComments(post.getId());
+
+        post.setComments(comments);
+        return post;
+    }
+
+    @Override
+    public void addComment(long postId, String commentText) {
+        String query = """
+            INSERT INTO comments (text, post_id)
+            VALUES (?, ?);
+        """;
+        jdbcTemplate.update(query, commentText, postId);
+    }
+
+    @Override
+    @Transactional
+    public void updateContent(PostUpdateContentDto dto) {
+        jdbcTemplate.update(
+            "UPDATE posts SET title = ?, text = ? WHERE id = ?;",
+            dto.getTitle(), dto.getText(), dto.getId()
+        );
+        updateTags(dto.getId(), dto.getTags());
+    }
+
+    @Override
+    @Transactional
+    public String updateContent(PostUpdateContentDto dto, String imagePath) {
+        String prevImagePath = jdbcTemplate.queryForObject(
+            "SELECT image_path FROM FINAL TABLE (UPDATE posts SET title = ?, text = ?, image_path = ? WHERE id = ?);",
+            String.class,
+            dto.getTitle(), dto.getText(), imagePath, dto.getId()
+        );
+        updateTags(dto.getId(), dto.getTags());
+        return prevImagePath;
+    }
+
+    private List<Comment> findComments(long postId) {
+        String query = """
             SELECT c.id, c.text
             FROM  comments AS c
             JOIN posts AS p ON c.post_id = p.id
             WHERE p.id = ?
             ORDER BY c.created_at DESC;
         """;
-        List<Comment> comments = jdbcTemplate.query(
-            selectCommentsQuery,
-            (rs, rowNum) -> {
-                Comment comment = new Comment();
-                comment.setId(rs.getLong("id"));
-                comment.setText(rs.getString("text"));
-                return comment;
-            },
-            id
+        return jdbcTemplate.query(
+            query,
+            (rs, rowNum) -> new Comment(
+                rs.getLong("id"),
+                rs.getString("text")
+            ),
+            postId
         );
+    }
 
-        post.setComments(comments);
-        return post;
+    private void addTags(long postId, Set<Tag> tags) {
+        if (tags.isEmpty()) {
+            return;
+        }
+        String tagQuerySet = "(" +
+            String.join(",", tags.stream().map(tag -> "'" + tag.name() + "'").toList()) +
+            ")";
+        String linkTagsQuery =
+            "INSERT INTO post_tag (post_id, tag_id) " +
+                "SELECT ?, id FROM tags WHERE name IN " +
+                tagQuerySet;
+        jdbcTemplate.update(linkTagsQuery, postId);
+    }
+
+    private void updateTags(long postId, Set<Tag> tags) {
+        jdbcTemplate.update("DELETE FROM post_tag WHERE post_id = ?", postId);
+        addTags(postId, tags);
     }
 }

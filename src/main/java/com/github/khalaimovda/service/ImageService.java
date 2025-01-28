@@ -7,8 +7,8 @@ import java.nio.file.Path;
 
 
 public interface ImageService {
-    String saveImage(MultipartFile file) throws IOException;
+    String saveImage(MultipartFile file);
     Path getImagePath(String fileName);
     String getImageSrcPath(String filename);
-    void deleteImage(String fileName) throws IOException;
+    void deleteImage(String fileName);
 }

@@ -1,7 +1,9 @@
 package com.github.khalaimovda.repository;
 
 
+import com.github.khalaimovda.dto.PostCreateDto;
 import com.github.khalaimovda.dto.PostSummary;
+import com.github.khalaimovda.dto.PostUpdateContentDto;
 import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
@@ -12,7 +14,10 @@ import java.util.function.Supplier;
 
 @Repository
 public interface PostRepository {
-    Page<PostSummary> findAll(Pageable pageable, Supplier<Tag> tagFilter);
-    void create(Post post);
+    Page<PostSummary> findAllSummariesPageable(Pageable pageable, Supplier<Tag> tagFilter);
+    void create(PostCreateDto dto);
     Post findById(long id);
+    void addComment(long postId, String commentText);
+    void updateContent(PostUpdateContentDto dto);
+    String updateContent(PostUpdateContentDto dto, String imagePath);
 }

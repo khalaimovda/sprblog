@@ -1,7 +1,9 @@
 package com.github.khalaimovda.mapper;
 
+import com.github.khalaimovda.dto.PostCreateDto;
 import com.github.khalaimovda.dto.PostCreateForm;
-import com.github.khalaimovda.model.Post;
+import com.github.khalaimovda.dto.PostUpdateContentDto;
+import com.github.khalaimovda.dto.PostUpdateContentForm;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -12,11 +14,14 @@ import org.mapstruct.ReportingPolicy;
 public interface PostMapper {
 
     @Mappings({
-        @Mapping(target = "id", ignore = true),
-        @Mapping(target = "createdAt", ignore = true),
-        @Mapping(target = "likes",  constant = "0"),
-        @Mapping(target = "comments", expression = "java(new java.util.ArrayList<>())"),
+        @Mapping(target = "tags", defaultExpression = "java(new java.util.HashSet<Tag>())"),
         @Mapping(target = "imagePath", source = "imagePath")
     })
-    Post toPost(PostCreateForm form, String imagePath);
+    PostCreateDto toPostCreateDto(PostCreateForm form, String imagePath);
+
+    @Mappings({
+        @Mapping(target = "tags", defaultExpression = "java(new java.util.HashSet<Tag>())"),
+        @Mapping(target = "id", source = "id"),
+    })
+    PostUpdateContentDto toPostUpdateContentDto(PostUpdateContentForm form, long id);
 }

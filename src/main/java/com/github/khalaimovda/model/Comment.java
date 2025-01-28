@@ -9,7 +9,11 @@ import lombok.Setter;
 @Getter
 @Setter
 public class Comment extends BaseModel {
-
     private String text;
-    private Post post;
+    private Long postId;
+
+    public Comment(long id, String text) {
+        this.id = id;
+        this.text = text;
+    }
 }

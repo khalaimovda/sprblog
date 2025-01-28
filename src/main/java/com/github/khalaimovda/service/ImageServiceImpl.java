@@ -21,14 +21,18 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public String saveImage(MultipartFile file) throws IOException {
+    public String saveImage(MultipartFile file) {
         if (file.isEmpty()) {
-            throw new IOException("File is empty");
+            throw new IllegalArgumentException("File is empty");
         }
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
         Path destinationFile = rootLocation.resolve(fileName).normalize();
-        Files.copy(file.getInputStream(), destinationFile);
+        try {
+            Files.copy(file.getInputStream(), destinationFile);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return fileName;
     }
@@ -44,8 +48,12 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public void deleteImage(String fileName) throws IOException {
+    public void deleteImage(String fileName) {
         Path filePath = rootLocation.resolve(fileName).normalize();
-        Files.deleteIfExists(filePath);
+        try {
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

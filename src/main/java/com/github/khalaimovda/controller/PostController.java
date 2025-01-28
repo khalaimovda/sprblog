@@ -2,6 +2,7 @@ package com.github.khalaimovda.controller;
 
 import com.github.khalaimovda.dto.PostCreateForm;
 import com.github.khalaimovda.dto.PostSummary;
+import com.github.khalaimovda.dto.PostUpdateContentForm;
 import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
@@ -25,15 +26,22 @@ public class PostController {
 
     @GetMapping
     public String getPosts(
-        @RequestParam(name="page", defaultValue = "0") int page,
-        @RequestParam(name="size", defaultValue = "10") int size,
+        @RequestParam(name="page", defaultValue = "0") int pageNumber,
+        @RequestParam(name="size", defaultValue = "10") int pageSize,
         @RequestParam(name="tag", required = false) Tag tag,
         Model model
     ) {
-        Pageable pageable = Pageable.of(page, size);
-        Page<PostSummary> posts = postService.getPosts(pageable, tag);
-        model.addAttribute("page", posts);
+        Pageable pageable = Pageable.of(pageNumber, pageSize);
+        Page<PostSummary> page = postService.getPostSummaryPage(pageable, tag);
+        model.addAttribute("page", page);
         return "posts";
+    }
+
+    @GetMapping("/{id}")
+    public String getPostById(@PathVariable(name = "id") Long id, Model model) {
+        Post post = postService.getPostById(id);
+        model.addAttribute("post", post);
+        return "post";
     }
 
     @PostMapping
@@ -42,10 +50,21 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/{id}")
-    public String getPostById(@PathVariable(name = "id") Long id, Model model) {
-        Post post = postService.getPostById(id);
-        model.addAttribute("post", post);
-        return "post";
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<Void> addComment(
+        @PathVariable(name = "id") Long postId,
+        @RequestParam(name="text") String commentText
+    ) {
+        postService.addComment(postId, commentText);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updatePostContent(
+        @PathVariable(name = "id") Long id,
+        @Valid @ModelAttribute PostUpdateContentForm form
+    ) {
+        postService.updatePostContent(id, form);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
