@@ -67,4 +67,10 @@ public class PostController {
         postService.updatePostContent(id, form);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @PostMapping("/{id}/like")
+    public ResponseEntity<Void> likePost(@PathVariable(name = "id") Long id) {
+        postService.likePost(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }

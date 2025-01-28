@@ -197,6 +197,11 @@ public class JdbcNativePostRepository implements PostRepository {
         return prevImagePath;
     }
 
+    @Override
+    public void incrementLikes(long id) {
+        jdbcTemplate.update("UPDATE posts SET likes = likes + 1 WHERE id = ?", id);
+    }
+
     private List<Comment> findComments(long postId) {
         String query = """
             SELECT c.id, c.text
@@ -229,6 +234,7 @@ public class JdbcNativePostRepository implements PostRepository {
         jdbcTemplate.update(linkTagsQuery, postId);
     }
 
+    @Transactional
     private void updateTags(long postId, Set<Tag> tags) {
         jdbcTemplate.update("DELETE FROM post_tag WHERE post_id = ?", postId);
         addTags(postId, tags);

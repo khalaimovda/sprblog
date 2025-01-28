@@ -20,4 +20,5 @@ public interface PostRepository {
     void addComment(long postId, String commentText);
     void updateContent(PostUpdateContentDto dto);
     String updateContent(PostUpdateContentDto dto, String imagePath);
+    void incrementLikes(long id);
 }

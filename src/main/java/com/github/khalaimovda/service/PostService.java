@@ -15,4 +15,5 @@ public interface PostService {
     Post getPostById(long id);
     void updatePostContent(long id, PostUpdateContentForm form);
     void addComment(long postId, String commentText);
+    void likePost(long id);
 }
