@@ -56,6 +56,7 @@ public class JdbcNativePostRepository implements PostRepository {
                 GROUP BY p.id
             )
             SELECT
+                p.id,
                 p.title,
                 p.text,
                 p.image_path,
@@ -86,6 +87,7 @@ public class JdbcNativePostRepository implements PostRepository {
                     .collect(Collectors.toSet());
 
                 return new PostSummary(
+                    rs.getLong("id"),
                     rs.getString("title"),
                     rs.getString("text"),
                     rs.getString("image_path"),
@@ -160,7 +162,7 @@ public class JdbcNativePostRepository implements PostRepository {
             return null;
         }
 
-        List<Comment> comments = findComments(post.getId());
+        List<Comment> comments = findComments(id);
 
         post.setComments(comments);
         return post;

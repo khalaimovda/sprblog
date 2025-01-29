@@ -15,6 +15,7 @@ import java.util.Set;
 @Getter
 @Setter
 public class PostSummary {
+    private Long id;
     private String title;
     private String text;
     private String imagePath;

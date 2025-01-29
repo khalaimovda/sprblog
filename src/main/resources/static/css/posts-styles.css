@@ -40,6 +40,11 @@ button {
   cursor: pointer;
 }
 
+a {
+  color: black;
+  text-decoration: none;
+}
+
 .new-post-div {
   width: 100%;
   padding-left: 40px;
