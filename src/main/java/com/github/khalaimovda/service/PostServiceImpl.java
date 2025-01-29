@@ -71,6 +71,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public void deleteComment(long id) {
+        postRepository.deleteComment(id);
+    }
+
+    @Override
     public void updatePostContent(long id, PostUpdateContentForm form) {
         PostUpdateContentDto updateContentDto = postMapper.toPostUpdateContentDto(form, id);
 

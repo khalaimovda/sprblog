@@ -23,4 +23,5 @@ public interface PostRepository {
     void incrementLikes(long id);
     void updateComment(long id, String text);
     String deletePost(long id);
+    void deleteComment(long id);
 }

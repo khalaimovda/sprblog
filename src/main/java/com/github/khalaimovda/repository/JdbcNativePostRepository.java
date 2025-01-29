@@ -225,6 +225,11 @@ public class JdbcNativePostRepository implements PostRepository {
         );
     }
 
+    @Override
+    public void deleteComment(long id) {
+        jdbcTemplate.update("DELETE FROM comments WHERE id = ?;", id);
+    }
+
     private List<Comment> findComments(long postId) {
         String query = """
             SELECT c.id, c.text
