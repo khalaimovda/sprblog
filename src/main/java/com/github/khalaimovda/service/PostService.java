@@ -16,4 +16,5 @@ public interface PostService {
     void updatePostContent(long id, PostUpdateContentForm form);
     void addComment(long postId, String commentText);
     void likePost(long id);
+    void deletePost(long id);
 }

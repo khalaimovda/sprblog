@@ -202,6 +202,24 @@ public class JdbcNativePostRepository implements PostRepository {
         jdbcTemplate.update("UPDATE posts SET likes = likes + 1 WHERE id = ?", id);
     }
 
+    @Override
+    @Transactional
+    public String deletePost(long id) {
+        // Delete comments
+        jdbcTemplate.update("DELETE FROM comments WHERE post_id = ?;", id);
+
+        // Delete tags
+        jdbcTemplate.update("DELETE FROM post_tag WHERE post_id = ?;", id);
+
+        // Delete post
+        jdbcTemplate.update("DELETE FROM posts WHERE id = ?;", id);
+        return jdbcTemplate.queryForObject(
+            "SELECT image_path FROM FINAL TABLE (DELETE FROM posts WHERE id = ? );",
+            String.class,
+            id
+        );
+    }
+
     private List<Comment> findComments(long postId) {
         String query = """
             SELECT c.id, c.text

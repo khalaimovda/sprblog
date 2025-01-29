@@ -21,4 +21,5 @@ public interface PostRepository {
     void updateContent(PostUpdateContentDto dto);
     String updateContent(PostUpdateContentDto dto, String imagePath);
     void incrementLikes(long id);
+    String deletePost(long id);
 }

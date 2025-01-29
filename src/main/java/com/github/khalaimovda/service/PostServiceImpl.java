@@ -60,6 +60,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public void deletePost(long id) {
+        String imagePath = postRepository.deletePost(id);
+        imageService.deleteImage(imagePath);
+    }
+
+    @Override
     public void updatePostContent(long id, PostUpdateContentForm form) {
         PostUpdateContentDto updateContentDto = postMapper.toPostUpdateContentDto(form, id);
 
