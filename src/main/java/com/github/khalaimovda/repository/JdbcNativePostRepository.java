@@ -203,6 +203,11 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
+    public void updateComment(long id, String text) {
+        jdbcTemplate.update("UPDATE comments SET text = ? WHERE id = ?", text, id);
+    }
+
+    @Override
     @Transactional
     public String deletePost(long id) {
         // Delete comments

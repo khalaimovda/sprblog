@@ -74,6 +74,16 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @PutMapping("/{postId}/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+        @PathVariable(name = "postId") Long postId,
+        @PathVariable(name = "commentId") Long commentId,
+        @RequestParam(name="text") String commentText
+    ) {
+        postService.updateComment(commentId, commentText);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable(name = "id") Long id) {
         postService.deletePost(id);

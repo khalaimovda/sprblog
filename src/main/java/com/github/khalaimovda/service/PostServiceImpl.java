@@ -60,6 +60,11 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public void updateComment(long id, String text) {
+        postRepository.updateComment(id, text);
+    }
+
+    @Override
     public void deletePost(long id) {
         String imagePath = postRepository.deletePost(id);
         imageService.deleteImage(imagePath);
