@@ -155,7 +155,29 @@ postForm.addEventListener('submit', (event) => {
   event.preventDefault();
 });
 
+document.querySelectorAll('.comment-delete').forEach(div => {
+    div.addEventListener('click', () => {
+        const postId = document.getElementById('postId').textContent;
+        const comment = div.closest('.comment');
+        const commentId = comment.querySelector('.comment-id').textContent.trim();
 
+        fetch(`${postId}/comments/${commentId}`, {
+            method: 'DELETE',
+          })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+              }
+            })
+            .then(data => {
+              window.location.href = window.location.href;
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('Delete comment error. See JS console');
+            });
+    });
+});
 
 document.querySelectorAll('.editable').forEach(div => {
   div.addEventListener('click', () => {
