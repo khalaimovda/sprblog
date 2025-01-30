@@ -148,12 +148,12 @@ public class JdbcNativePostRepository implements PostRepository {
                         .collect(Collectors.toSet());
 
                     return new Post(
+                        id,
                         rs.getString("title"),
                         rs.getString("text"),
                         rs.getString("image_path"),
                         rs.getInt("likes"),
-                        tags,
-                        List.of()
+                        tags
                     );
                 },
                 id

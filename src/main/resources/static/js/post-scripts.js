@@ -63,9 +63,11 @@ modalOverlay.addEventListener('click', (event) => {
 
 
 commentForm.addEventListener('submit', (event) => {
+
+  const postId = document.getElementById('postId').textContent;
   const formData = new FormData(commentForm);
 
-  fetch(commentForm.action, {
+  fetch(`${postId}/comments`, {
     method: 'POST',
     body: formData,
   })
