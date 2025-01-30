@@ -191,7 +191,7 @@ public class JdbcNativePostRepository implements PostRepository {
     @Transactional
     public String updateContent(PostUpdateContentDto dto, String imagePath) {
         String prevImagePath = jdbcTemplate.queryForObject(
-            "SELECT image_path FROM FINAL TABLE (UPDATE posts SET title = ?, text = ?, image_path = ? WHERE id = ?);",
+            "SELECT image_path FROM OLD TABLE (UPDATE posts SET title = ?, text = ?, image_path = ? WHERE id = ?);",
             String.class,
             dto.getTitle(), dto.getText(), imagePath, dto.getId()
         );
