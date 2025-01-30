@@ -159,6 +159,7 @@ postForm.addEventListener('submit', (event) => {
 
 document.querySelectorAll('.editable').forEach(div => {
   div.addEventListener('click', () => {
+    const postId = document.getElementById('postId').textContent;
     const comment = div.closest('.comment');
     const commentId = comment.querySelector('.comment-id').textContent.trim();
 
@@ -173,20 +174,20 @@ document.querySelectorAll('.editable').forEach(div => {
       if (event.ctrlKey && event.key === 'Enter') {
         event.preventDefault();
 
-        const newValue = textarea.value;
-
+        const newText = textarea.value;
+        const formData = new FormData();
+        formData.append("text", newText);
         try {
-          const response = await fetch('/your-api-endpoint', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, text: newValue }),
+          const response = await fetch(`${postId}/comments/${commentId}`, {
+            method: 'PUT',
+            body: formData,
           });
 
           if (!response.ok) {
             throw new Error(`Failed to update text. Status: ${response.status}`);
           }
 
-          div.textContent = newValue;
+          div.textContent = newText;
           textarea.replaceWith(div);
         } catch (error) {
           console.error('Error:', error);

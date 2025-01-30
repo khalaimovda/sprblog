@@ -1,5 +1,6 @@
 package com.github.khalaimovda.controller;
 
+import com.github.khalaimovda.dto.CommentUpdateContentForm;
 import com.github.khalaimovda.dto.PostCreateForm;
 import com.github.khalaimovda.dto.PostSummary;
 import com.github.khalaimovda.dto.PostUpdateContentForm;
@@ -75,12 +76,12 @@ public class PostController {
     }
 
     @PutMapping("/{postId}/comments/{commentId}")
-    public ResponseEntity<Void> deleteComment(
+    public ResponseEntity<Void> updateComment(
         @PathVariable(name = "postId") Long postId,
         @PathVariable(name = "commentId") Long commentId,
-        @RequestParam(name="text") String commentText
+        @Valid @ModelAttribute CommentUpdateContentForm form
     ) {
-        postService.updateComment(commentId, commentText);
+        postService.updateComment(commentId, form.getText());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -91,7 +92,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}/comments/{commentId}")
-    public ResponseEntity<Void> deletePost(
+    public ResponseEntity<Void> deleteComment(
         @PathVariable(name = "postId") Long postId,
         @PathVariable(name = "commentId") Long commentId
     ) {
