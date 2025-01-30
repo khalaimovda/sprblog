@@ -112,14 +112,13 @@ postForm.addEventListener('submit', (event) => {
   selectedTags.forEach(tag => formData.append('tags', tag));
 
   fetch(postForm.action, {
-    method: 'POST',
+    method: 'PATCH',
     body: formData,
   })
     .then(response => {
       if (!response.ok) {
         throw new Error(`Error: ${response.statusText}`);
       }
-      return response.json();
     })
     .then(data => {
       closeModal();
