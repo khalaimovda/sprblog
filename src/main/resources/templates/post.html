@@ -27,7 +27,7 @@
             <div class="tags" id="actualTags">
                 <div class="tag" th:each="tag : ${post.tags}" th:text="${tag}">Тег</div>
             </div>
-            <div class="likes"><button>Лайков: !0!</button></div>
+            <div class="likes" id="likes"><button th:text="'Лайков: ' + ${post.likes}"></button></div>
         </div>
 
         <div class="edit-delete">

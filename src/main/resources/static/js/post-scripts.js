@@ -1,6 +1,7 @@
 const modalOverlay = document.getElementById('modalOverlay');
 const commentForm = document.getElementById('commentForm');
 const postForm = document.getElementById('postForm');
+const likes = document.getElementById('likes');
 
 const addComment = document.getElementById('addComment');
 const editPost = document.getElementById('editPost');
@@ -8,6 +9,26 @@ const modalPost = document.getElementById("modalPost");
 const modalComment = document.getElementById("modalComment");
 
 const tagsContainer = document.getElementById('tags');
+
+
+likes.addEventListener('click', () => {
+   const postId = document.getElementById('postId').textContent;
+   fetch(`${postId}/like`, {
+       method: 'POST'
+     })
+       .then(response => {
+         if (!response.ok) {
+           throw new Error(`Error: ${response.statusText}`);
+         }
+       })
+       .then(data => {
+         window.location.href = window.location.href;
+       })
+       .catch(error => {
+         console.error('Error:', error);
+         alert('Like post error. See JS console');
+       });
+ });
 
 
 addComment.addEventListener('click', () => {
