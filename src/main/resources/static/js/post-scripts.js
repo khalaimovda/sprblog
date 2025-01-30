@@ -5,6 +5,7 @@ const likes = document.getElementById('likes');
 
 const addComment = document.getElementById('addComment');
 const editPost = document.getElementById('editPost');
+const deletePost = document.getElementById('deletePost');
 const modalPost = document.getElementById("modalPost");
 const modalComment = document.getElementById("modalComment");
 
@@ -64,6 +65,27 @@ editPost.addEventListener('click', () => {
   document.body.classList.add('modal-open');
 
   fillPostForm();
+});
+
+
+deletePost.addEventListener('click', () => {
+  const postId = document.getElementById('postId').textContent;
+
+  fetch(`${postId}`, {
+      method: 'DELETE',
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Error: ${response.statusText}`);
+        }
+      })
+      .then(data => {
+        window.location.pathname = "/sprblog/posts";
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Post deleting error. See JS console');
+      });
 });
 
 

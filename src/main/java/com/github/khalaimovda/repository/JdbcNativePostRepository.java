@@ -219,9 +219,8 @@ public class JdbcNativePostRepository implements PostRepository {
         jdbcTemplate.update("DELETE FROM post_tag WHERE post_id = ?;", id);
 
         // Delete post
-        jdbcTemplate.update("DELETE FROM posts WHERE id = ?;", id);
         return jdbcTemplate.queryForObject(
-            "SELECT image_path FROM FINAL TABLE (DELETE FROM posts WHERE id = ? );",
+            "SELECT image_path FROM OLD TABLE (DELETE FROM posts WHERE id = ? );",
             String.class,
             id
         );
