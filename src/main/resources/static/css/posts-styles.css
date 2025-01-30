@@ -45,6 +45,10 @@ a {
   text-decoration: none;
 }
 
+.multiline-text {
+    white-space: pre-line;
+}
+
 .new-post-div {
   width: 100%;
   padding-left: 40px;

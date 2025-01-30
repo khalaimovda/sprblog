@@ -22,7 +22,7 @@
         <div class="image">
             <img th:src="@{'/' + ${post.imagePath}}" alt="Post Image">
         </div>
-        <div class="text" id="actualText" th:text="${post.text}">Текст поста</div>
+        <div class="text multiline-text" id="actualText" th:text="${post.text}">Текст поста</div>
         <div class="tags-likes">
             <div class="tags" id="actualTags">
                 <div class="tag" th:each="tag : ${post.tags}" th:text="${tag}">Тег</div>
@@ -38,7 +38,7 @@
         <div class="comments">
             <div class="comment" th:each="comment : ${post.comments}">
                 <div class="comment-id"  th:text="${comment.id}" hidden></div>
-                <div class="comment-text editable" th:text="${comment.text}">Текст комментария</div>
+                <div class="comment-text multiline-text editable" th:text="${comment.text}">Текст комментария</div>
                 <div class="comment-delete">
                     <button>Удалить</button>
                 </div>
@@ -74,7 +74,7 @@
 
         <div class="modal-comment" id="modalComment">
             <div class="modal-header">Новый комментарий</div>
-            <form id="commentForm" enctype="multipart/form-data" method="post" th:action="@{/posts/1/comments}">
+            <form id="commentForm" enctype="multipart/form-data" method="post">
                 <textarea id="text" name="text" rows="5" placeholder="Enter comment text" required></textarea>
                 <button type="submit">Добавить</button>
             </form>

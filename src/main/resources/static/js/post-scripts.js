@@ -140,7 +140,7 @@ postForm.addEventListener('submit', (event) => {
 document.querySelectorAll('.editable').forEach(div => {
   div.addEventListener('click', () => {
     const comment = div.closest('.comment');
-    const commentId = commentElement.querySelector('.comment-id').textContent.trim();
+    const commentId = comment.querySelector('.comment-id').textContent.trim();
 
     const text = div.textContent;
     // const text = div.textContent.trim();

@@ -36,6 +36,10 @@ header {
   justify-content: space-between;
 }
 
+.multiline-text {
+    white-space: pre-line;
+}
+
 .new-comment-div {
   width: 100%;
   padding-left: 40px;

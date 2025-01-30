@@ -33,7 +33,7 @@
             <div class="image">
                 <img th:src="@{'/' + ${post.imagePath}}" alt="Post Image">
             </div>
-            <div class="text" th:text="${post.text}">Текст поста</div>
+            <div class="text multiline-text" th:text="${post.text}">Текст поста</div>
             <div class="tags">
                 <div class="tag" th:each="tag : ${post.tags}" th:text="${tag}">Тег</div>
             </div>
