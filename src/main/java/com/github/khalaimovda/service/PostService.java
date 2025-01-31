@@ -7,10 +7,11 @@ import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
 import com.github.khalaimovda.pagination.Pageable;
+import org.springframework.lang.Nullable;
 
 
 public interface PostService {
-    Page<PostSummary> getPostSummaryPage(Pageable pageable, Tag tagFilter);
+    Page<PostSummary> getPostSummaryPage(Pageable pageable, @Nullable Tag tagFilter);
     void createPost(PostCreateForm form);
     Post getPostById(long id);
     void updatePostContent(long id, PostUpdateContentForm form);

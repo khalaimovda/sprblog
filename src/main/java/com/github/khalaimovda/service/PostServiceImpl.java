@@ -9,6 +9,7 @@ import com.github.khalaimovda.pagination.Pageable;
 import com.github.khalaimovda.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,9 +26,8 @@ public class PostServiceImpl implements PostService {
     private final PostMapper postMapper;
 
     @Override
-    public Page<PostSummary> getPostSummaryPage(Pageable pageable, Tag tag) {
-        Supplier<Tag> tagFilter = tag != null ? () -> tag : null;
-        Page<PostSummary> page = postRepository.findAllSummariesPageable(pageable, tagFilter);
+    public Page<PostSummary> getPostSummaryPage(Pageable pageable, @Nullable Tag tag) {
+        Page<PostSummary> page = postRepository.findAllSummariesPageable(pageable, tag);
         page.content().forEach(ps -> ps.setImagePath(imageService.getImageSrcPath(ps.getImagePath())));
         return page;
     }

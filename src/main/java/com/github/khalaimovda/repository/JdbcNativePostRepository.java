@@ -28,11 +28,9 @@ public class JdbcNativePostRepository implements PostRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Page<PostSummary> findAllSummariesPageable(Pageable pageable, Supplier<Tag> tagFilter) {
+    public Page<PostSummary> findAllSummariesPageable(Pageable pageable, @Nullable Tag tag) {
 
-        String tagFilterStatement = tagFilter != null ?
-            String.format("WHERE '%s' = ANY(pt.tags)", tagFilter.get().name())
-            : "";
+        String tagFilterStatement = tag != null ? String.format("WHERE '%s' = ANY(pt.tags)", tag.name()) : "";
 
         String query = String.format("""
             WITH post_tags AS (
