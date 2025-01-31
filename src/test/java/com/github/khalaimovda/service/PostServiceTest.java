@@ -1,6 +1,8 @@
 package com.github.khalaimovda.service;
 
 import com.github.khalaimovda.config.TestConfig;
+import com.github.khalaimovda.dto.PostCreateDto;
+import com.github.khalaimovda.dto.PostCreateForm;
 import com.github.khalaimovda.dto.PostSummary;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
@@ -8,8 +10,10 @@ import com.github.khalaimovda.pagination.Pageable;
 import com.github.khalaimovda.repository.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
@@ -86,5 +90,24 @@ class PostServiceTest {
         for (int i = 0; i < 2; i++) {
             assertEquals(expectedPosts.get(i), resultPosts.get(i));
         }
+    }
+
+    @Test
+    void testCreatePost() {
+        MultipartFile image = mock(MultipartFile.class);
+        PostCreateForm form = new PostCreateForm("Test Title", "Test Text", image, Set.of(Tag.POLITICS, Tag.RELIGION));
+        when(imageService.saveImage(image)).thenReturn("test_image_path.jpg");
+        doNothing().when(postRepository).create(any(PostCreateDto.class));
+
+        PostCreateDto expectedPostCreateDto = new PostCreateDto("Test Title", "Test Text", "test_image_path.jpg", Set.of(Tag.POLITICS, Tag.RELIGION));
+
+        postService.createPost(form);
+
+        verify(imageService).saveImage(image);
+
+        ArgumentCaptor<PostCreateDto> postCreateDtoCaptor = ArgumentCaptor.forClass(PostCreateDto.class);
+        verify(postRepository).create(postCreateDtoCaptor.capture());
+        PostCreateDto capturedPostCreateDto = postCreateDtoCaptor.getValue();
+        assertEquals(expectedPostCreateDto, capturedPostCreateDto);
     }
 }
