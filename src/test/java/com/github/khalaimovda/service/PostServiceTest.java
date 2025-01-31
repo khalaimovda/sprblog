@@ -4,6 +4,7 @@ import com.github.khalaimovda.config.TestConfig;
 import com.github.khalaimovda.dto.PostCreateDto;
 import com.github.khalaimovda.dto.PostCreateForm;
 import com.github.khalaimovda.dto.PostSummary;
+import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
 import com.github.khalaimovda.pagination.Pageable;
@@ -12,14 +13,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
@@ -109,5 +111,34 @@ class PostServiceTest {
         verify(postRepository).create(postCreateDtoCaptor.capture());
         PostCreateDto capturedPostCreateDto = postCreateDtoCaptor.getValue();
         assertEquals(expectedPostCreateDto, capturedPostCreateDto);
+    }
+
+    @Test
+    void testGetPostById() {
+        Post post = new Post(13L, "Post Title", "Post Text", "image_name.jpg", 13, Set.of(Tag.POLITICS));
+        when(postRepository.findById(13L)).thenReturn(post);
+        when(imageService.getImageSrcPath("image_name.jpg")).thenReturn("/image/image_name.jpg");
+
+        Post expectedPost = new Post(13L, "Post Title", "Post Text", "/image/image_name.jpg", 13, Set.of(Tag.POLITICS));
+
+        Post resultPost = postService.getPostById(13L);
+        verify(postRepository).findById(13L);
+        verify(imageService).getImageSrcPath("image_name.jpg");
+
+        assertEquals(expectedPost.getId(), resultPost.getId());
+        assertEquals(expectedPost.getTitle(), resultPost.getTitle());
+        assertEquals(expectedPost.getImagePath(), resultPost.getImagePath());
+        assertEquals(expectedPost.getLikes(), resultPost.getLikes());
+        assertEquals(expectedPost.getTags(), resultPost.getTags());
+    }
+
+    @Test
+    void testGetPostByIdNotFound() {
+        when(postRepository.findById(13L)).thenReturn(null);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> postService.getPostById(13L));
+        assertEquals("Post with id 13 not found", exception.getReason());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
+
+        verify(imageService, never()).getImageSrcPath(any());
     }
 }

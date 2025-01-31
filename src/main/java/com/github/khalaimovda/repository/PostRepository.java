@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 public interface PostRepository {
     Page<PostSummary> findAllSummariesPageable(Pageable pageable, @Nullable Tag tag);
     void create(PostCreateDto dto);
-    Post findById(long id);
+    @Nullable Post findById(long id);
     void addComment(long postId, String commentText);
     void updateContent(PostUpdateContentDto dto);
     String updateContent(PostUpdateContentDto dto, String imagePath);
