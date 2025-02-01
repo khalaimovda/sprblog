@@ -8,16 +8,16 @@ import com.github.khalaimovda.pagination.Page;
 import com.github.khalaimovda.pagination.Pageable;
 import com.github.khalaimovda.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.function.Supplier;
-
 
 @Service
+@Primary
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 

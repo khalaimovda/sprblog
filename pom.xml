@@ -122,6 +122,32 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- Error creating bean with name 'routerFunctionMapping' defined in
+    org.springframework.web.servlet.config.annotation.DelegatingWebMvcConfiguration:
+    Failed to instantiate [org.springframework.web.servlet.function.support.RouterFunctionMapping]:
+    Factory method 'routerFunctionMapping' threw exception with message:
+    JSON Binding provider org.eclipse.yasson.JsonBindingProvider not found -->
+    <dependency>
+      <groupId>org.eclipse</groupId>
+      <artifactId>yasson</artifactId>
+      <version>3.0.4</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- cannot access org.hamcrest.Matcher -->
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>hamcrest</artifactId>
+      <version>3.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>7.5</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>

@@ -9,6 +9,7 @@ import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
 import com.github.khalaimovda.pagination.Pageable;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.lang.Nullable;
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
+@Primary
 @RequiredArgsConstructor
 public class JdbcNativePostRepository implements PostRepository {
 
