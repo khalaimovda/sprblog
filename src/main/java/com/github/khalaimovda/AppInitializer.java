@@ -1,5 +1,7 @@
 package com.github.khalaimovda;
 
+import com.github.khalaimovda.config.AppConfig;
+import com.github.khalaimovda.config.WebConfig;
 import jakarta.servlet.MultipartConfigElement;
 import jakarta.servlet.ServletRegistration;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
@@ -8,12 +10,12 @@ public class AppInitializer extends AbstractAnnotationConfigDispatcherServletIni
 
     @Override
     protected Class<?>[] getRootConfigClasses() {
-        return null;
+        return new Class[]{ AppConfig.class };
     }
 
     @Override
     protected Class<?>[] getServletConfigClasses() {
-        return new Class[]{ AppConfig.class };
+        return new Class[]{ WebConfig.class };
     }
 
     @Override

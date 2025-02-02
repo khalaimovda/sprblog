@@ -1,6 +1,6 @@
 package com.github.khalaimovda.service;
 
-import com.github.khalaimovda.config.TestConfig;
+import com.github.khalaimovda.config.PostServiceTestConfig;
 import com.github.khalaimovda.dto.PostCreateDto;
 import com.github.khalaimovda.dto.PostCreateForm;
 import com.github.khalaimovda.dto.PostSummary;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
-@SpringJUnitConfig(classes = TestConfig.class)
+@SpringJUnitConfig(classes = PostServiceTestConfig.class)
 class PostServiceTest {
 
     @Autowired

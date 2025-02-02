@@ -15,7 +15,7 @@ import static org.mockito.Mockito.mock;
 
 @Configuration
 @ComponentScan(basePackages = "com.github.khalaimovda.mapper")
-public class TestConfig {
+public class PostServiceTestConfig {
 
     @Autowired
     private PostMapper postMapper;

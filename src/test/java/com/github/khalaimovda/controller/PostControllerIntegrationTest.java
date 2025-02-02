@@ -1,10 +1,9 @@
 package com.github.khalaimovda.controller;
 
-import com.github.khalaimovda.AppConfig;
+import com.github.khalaimovda.config.AppConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
@@ -18,10 +17,12 @@ import org.springframework.web.context.WebApplicationContext;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Comparator;
 import java.util.Map;
 
+import static com.github.khalaimovda.utils.DatabaseUtils.cleanData;
+import static com.github.khalaimovda.utils.DatabaseUtils.fillData;
+import static com.github.khalaimovda.utils.ImageUtils.cleanImages;
+import static com.github.khalaimovda.utils.ImageUtils.createImageFilePath;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -49,69 +50,11 @@ class PostControllerIntegrationTest {
         // Set Web Application Context
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
 
-        cleanData();
-        cleanImages();
-        fillData();
+        cleanData(jdbcTemplate);
+        cleanImages(resourceLoader);
+        fillData(jdbcTemplate);
     }
 
-    void cleanData() {
-        jdbcTemplate.execute("DELETE FROM comments;");
-        jdbcTemplate.execute("DELETE FROM post_tag;");
-        jdbcTemplate.execute("DELETE FROM posts;");
-    }
-
-    void fillData() {
-        jdbcTemplate.execute(" INSERT INTO posts (id, title, text, image_path, likes) VALUES(1, 'First', 'First text', 'first_image.jpg', 3);");
-        jdbcTemplate.execute(" INSERT INTO posts (id, title, text, image_path, likes) VALUES(2, 'Second', 'Second text', 'second_image.jpg', 15);");
-
-        jdbcTemplate.execute(
-            """
-                INSERT INTO comments (id, text, post_id)
-                SELECT 1, 'First comment of first post', id
-                FROM posts WHERE title = 'First';
-                """
-        );
-        jdbcTemplate.execute(
-            """
-                INSERT INTO comments (id, text, post_id)
-                SELECT 2, 'Second comment of first post', id
-                FROM posts WHERE title = 'First';
-                """
-        );
-
-        jdbcTemplate.execute(
-            """
-                INSERT INTO post_tag (post_id, tag_id)
-                SELECT
-                    (SELECT id FROM posts WHERE title = 'First'),
-                    (SELECT id FROM tags WHERE name = 'SCIENCE');
-                """
-        );
-    }
-
-    void cleanImages() throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:/static/images");
-        Path imageLocation = Paths.get(resource.getURI());
-
-        if (Files.exists(imageLocation)) {
-            Files.walk(imageLocation)
-                .sorted(Comparator.reverseOrder())
-                .forEach(path -> {
-                    try {
-                        Files.delete(path);
-                    } catch (IOException e) {
-                        throw new RuntimeException("Clean test image directory error", e);
-                    }
-                });
-        }
-        Files.createDirectories(imageLocation);
-    }
-
-    Path createImageFilePath(String imageFilename) throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:/static/images");
-        Path imageLocation = Paths.get(resource.getURI());
-        return imageLocation.resolve(imageFilename);
-    }
 
     @Test
     void testGetPostsShouldReturnHtmlWithPosts() throws Exception {
@@ -141,12 +84,14 @@ class PostControllerIntegrationTest {
 
     @Test
     void testGetPostByIdShouldReturnHtmlWithPost() throws Exception {
-        mockMvc.perform(get("/posts/1"))
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+
+        mockMvc.perform(get("/posts/" + postId))
             .andExpect(status().isOk())
             .andExpect(content().contentType("text/html;charset=UTF-8"))
             .andExpect(view().name("post"))
             .andExpect(model().attributeExists("post"))
-            .andExpect(content().string(containsString("<div id=\"postId\" hidden>1</div>")))
+            .andExpect(content().string(containsString(String.format("<div id=\"postId\" hidden>%s</div>", postId))))
             .andExpect(content().string(containsString("<h2>First</h2>")))
             .andExpect(content().string(containsString("First text")))
             .andExpect(content().string(containsString("images/first_image.jpg")))
@@ -229,16 +174,17 @@ class PostControllerIntegrationTest {
         assertNotNull(religionTagCount);
         assertEquals(1, religionTagCount);
 
-        Path imageFilePath = createImageFilePath(imagePath);
+        Path imageFilePath = createImageFilePath(resourceLoader, imagePath);
         String savedImageContent = Files.readString(imageFilePath);
         assertEquals(imageContent, savedImageContent);
     }
 
     @Test
     void testAddComment() throws Exception {
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
         String text = "New comment";
 
-        mockMvc.perform(post("/posts/1/comments")
+        mockMvc.perform(post(String.format("/posts/%s/comments", postId))
                 .param("text", text))
             .andExpect(status().isCreated());
 
@@ -247,7 +193,7 @@ class PostControllerIntegrationTest {
             SELECT COUNT(*) FROM comments WHERE post_id = ?
             """,
             Integer.class,
-            1
+            postId
         );
         assertNotNull(totalCount);
         assertEquals(3, totalCount);
@@ -257,7 +203,7 @@ class PostControllerIntegrationTest {
             SELECT COUNT(*) FROM comments WHERE post_id = ? AND text = ?;
             """,
             Integer.class,
-            1, text
+            postId, text
         );
         assertNotNull(count);
         assertEquals(1, count);
@@ -265,6 +211,8 @@ class PostControllerIntegrationTest {
 
     @Test
     void testUpdatePostContent() throws Exception {
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+
         String title = "New title";
         String text = "New text";
         String imageFilename = "updated_image.jpg";
@@ -277,7 +225,7 @@ class PostControllerIntegrationTest {
             imageContent.getBytes()
         );
 
-        mockMvc.perform(multipart("/posts/1")
+        mockMvc.perform(multipart("/posts/" + postId)
                 .file(imageFile)
                 .param("title", title)
                 .param("text", text)
@@ -289,72 +237,79 @@ class PostControllerIntegrationTest {
             .andExpect(status().isOk());
 
         Integer postCount = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM posts WHERE id = 1 AND title = ? AND text = ? AND image_path LIKE ?",
+            "SELECT COUNT(*) FROM posts WHERE id = ? AND title = ? AND text = ? AND image_path LIKE ?",
             Integer.class,
-            title, text, "%" + imageFilename
+            postId, title, text, "%" + imageFilename
         );
         assertNotNull(postCount);
         assertEquals(1, postCount);
 
-        String imagePath = jdbcTemplate.queryForObject("SELECT image_path FROM posts WHERE id = 1", String.class);
+        String imagePath = jdbcTemplate.queryForObject("SELECT image_path FROM posts WHERE id = ?", String.class, postId);
 
         Integer commentTotalCount = jdbcTemplate.queryForObject(
             """
-            SELECT COUNT(*) FROM comments WHERE post_id = 1
+            SELECT COUNT(*) FROM comments WHERE post_id = ?
             """,
-            Integer.class
+            Integer.class,
+            postId
         );
         assertNotNull(commentTotalCount);
         assertEquals(2, commentTotalCount);
 
         Integer tagTotalCount = jdbcTemplate.queryForObject(
             """
-            SELECT COUNT(*) FROM post_tag WHERE post_id = 1
+            SELECT COUNT(*) FROM post_tag WHERE post_id = ?
             """,
-            Integer.class
+            Integer.class,
+            postId
         );
         assertNotNull(tagTotalCount);
         assertEquals(1, tagTotalCount);
 
         Integer tagCount = jdbcTemplate.queryForObject(
             """
-            SELECT COUNT(*) FROM post_tag WHERE post_id = 1
-            AND tag_id = (SELECT id FROM tags WHERE name = 'POLITICS'); 
+            SELECT COUNT(*) FROM post_tag WHERE post_id = ?
+            AND tag_id = (SELECT id FROM tags WHERE name = 'POLITICS');
             """,
-            Integer.class
+            Integer.class,
+            postId
         );
         assertNotNull(tagCount);
         assertEquals(1, tagCount);
 
-        Path prevImageFilePath = createImageFilePath("first_image.jpg");
+        Path prevImageFilePath = createImageFilePath(resourceLoader, "first_image.jpg");
         assertFalse(Files.exists(prevImageFilePath));
 
-        Path imageFilePath = createImageFilePath(imagePath);
+        Path imageFilePath = createImageFilePath(resourceLoader, imagePath);
         String savedImageContent = Files.readString(imageFilePath);
         assertEquals(imageContent, savedImageContent);
     }
 
     @Test
     void testLikePost() throws Exception {
-        mockMvc.perform(post("/posts/1/like")).andExpect(status().isOk());
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+        mockMvc.perform(post(String.format("/posts/%s/like", postId))).andExpect(status().isOk());
 
-        Integer likes = jdbcTemplate.queryForObject("SELECT likes FROM posts WHERE id = 1; ", Integer.class);
+        Integer likes = jdbcTemplate.queryForObject("SELECT likes FROM posts WHERE id = ?; ", Integer.class, postId);
         assertNotNull(likes);
         assertEquals(4, likes);
     }
 
     @Test
     void testUpdateComment() throws Exception {
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+        Long commentId = jdbcTemplate.queryForObject("SELECT id FROM comments WHERE text = 'First comment of first post';", Long.class);
+
         String text = "New comment text";
 
-        mockMvc.perform(put("/posts/1/comments/1")
+        mockMvc.perform(put(String.format("/posts/%s/comments/%s", postId, commentId))
                 .param("text", text))
             .andExpect(status().isOk());
 
         Integer count = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM comments WHERE id = 1 AND text = ?;",
+            "SELECT COUNT(*) FROM comments WHERE id = ? AND text = ?;",
             Integer.class,
-            text
+            commentId, text
         );
         assertNotNull(count);
         assertEquals(1, count);
@@ -362,18 +317,22 @@ class PostControllerIntegrationTest {
 
     @Test
     void testDeletePost() throws Exception {
-        mockMvc.perform(delete("/posts/1")).andExpect(status().isNoContent());
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+        mockMvc.perform(delete("/posts/" + postId)).andExpect(status().isNoContent());
 
-        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM posts WHERE id = 1;", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM posts WHERE id = ?;", Integer.class, postId);
         assertNotNull(count);
         assertEquals(0, count);
     }
 
     @Test
     void testDeleteComment() throws Exception {
-        mockMvc.perform(delete("/posts/1/comments/1")).andExpect(status().isNoContent());
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+        Long commentId = jdbcTemplate.queryForObject("SELECT id FROM comments WHERE text = 'First comment of first post';", Long.class);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM comments WHERE id = 1;", Integer.class);
+        mockMvc.perform(delete(String.format("/posts/%s/comments/%s", postId, commentId))).andExpect(status().isNoContent());
+
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM comments WHERE id = ?;", Integer.class, commentId);
         assertNotNull(count);
         assertEquals(0, count);
     }

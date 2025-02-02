@@ -20,6 +20,8 @@ import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import java.util.List;
 import java.util.Set;
 
+import static com.github.khalaimovda.utils.DatabaseUtils.cleanData;
+import static com.github.khalaimovda.utils.DatabaseUtils.fillData;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringJUnitConfig(classes = {DataSourceConfig.class, JdbcNativePostRepository.class, DatabaseInitializer.class})
@@ -37,42 +39,15 @@ class JdbcNativePostRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        // Clear data
-        jdbcTemplate.execute("DELETE FROM comments;");
-        jdbcTemplate.execute("DELETE FROM post_tag;");
-        jdbcTemplate.execute("DELETE FROM posts;");
-
-        // Fill data
-        jdbcTemplate.execute(" INSERT INTO posts (id, title, text, image_path, likes) VALUES(1, 'First', 'First text', 'first_image.jpg', 3);");
-        jdbcTemplate.execute(" INSERT INTO posts (id, title, text, image_path, likes) VALUES(2, 'Second', 'Second text', 'second_image.jpg', 15);");
-
-        jdbcTemplate.execute(
-            """
-                INSERT INTO comments (id, text, post_id)
-                SELECT 1, 'First comment of first post', id
-                FROM posts WHERE title = 'First';
-                """
-        );
-        jdbcTemplate.execute(
-            """
-                INSERT INTO comments (id, text, post_id)
-                SELECT 2, 'Second comment of first post', id
-                FROM posts WHERE title = 'First';
-                """
-        );
-
-        jdbcTemplate.execute(
-            """
-                INSERT INTO post_tag (post_id, tag_id)
-                SELECT
-                    (SELECT id FROM posts WHERE title = 'First'),
-                    (SELECT id FROM tags WHERE name = 'SCIENCE');
-                """
-        );
+        cleanData(jdbcTemplate);
+        fillData(jdbcTemplate);
     }
 
     @Test
     void testFindAllSummariesPageableFirstPageWithoutTagFilter() {
+        Long fistPostId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+        Long secondPostId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'Second';", Long.class);
+
         Page<PostSummary> page = postRepository.findAllSummariesPageable(
             new Pageable() {
                 @Override
@@ -94,8 +69,8 @@ class JdbcNativePostRepositoryTest {
         );
 
         List<PostSummary> expectedContent = List.of(
-            new PostSummary(2L, "Second", "Second text", "second_image.jpg", 15, Set.of(), 0),
-            new PostSummary(1L, "First", "First text", "first_image.jpg", 3, Set.of(Tag.SCIENCE), 2)
+            new PostSummary(secondPostId, "Second", "Second text", "second_image.jpg", 15, Set.of(), 0),
+            new PostSummary(fistPostId, "First", "First text", "first_image.jpg", 3, Set.of(Tag.SCIENCE), 2)
         );
 
         assertNotNull(page);
@@ -108,6 +83,7 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void testFindAllSummariesPageableFirstPageWithTagFilter() {
+        Long fistPostId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
         Page<PostSummary> page = postRepository.findAllSummariesPageable(
             new Pageable() {
                 @Override
@@ -129,7 +105,7 @@ class JdbcNativePostRepositoryTest {
         );
 
         List<PostSummary> expectedContent = List.of(
-            new PostSummary(1L, "First", "First text", "first_image.jpg", 3, Set.of(Tag.SCIENCE), 2)
+            new PostSummary(fistPostId, "First", "First text", "first_image.jpg", 3, Set.of(Tag.SCIENCE), 2)
         );
 
         assertNotNull(page);
@@ -141,13 +117,18 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void testFindById() {
-        Post expectedPost = new Post(1L, "First", "First text", "first_image.jpg", 3, Set.of(Tag.SCIENCE));
+        Long fistPostId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+        Long firstCommentId = jdbcTemplate.queryForObject("SELECT id FROM comments WHERE text = 'First comment of first post';", Long.class);
+        Long secondCommentId = jdbcTemplate.queryForObject("SELECT id FROM comments WHERE text = 'Second comment of first post';", Long.class);
+
+
+        Post expectedPost = new Post(fistPostId, "First", "First text", "first_image.jpg", 3, Set.of(Tag.SCIENCE));
         expectedPost.setComments(List.of(
-            new Comment(2L, "Second comment of first post"),
-            new Comment(1L, "First comment of first post")
+            new Comment(secondCommentId, "Second comment of first post"),
+            new Comment(firstCommentId, "First comment of first post")
         ));
 
-        Post post = postRepository.findById(1);
+        Post post = postRepository.findById(fistPostId);
 
         assertNotNull(post);
         assertEquals(expectedPost.getId(), post.getId());
@@ -168,7 +149,7 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void testFindByIdNotFound() {
-        Post post = postRepository.findById(3);
+        Post post = postRepository.findById(Long.MAX_VALUE / 2);
         assertNull(post);
     }
 
@@ -229,7 +210,7 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void testAddComment() {
-        long postId = 1L;
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
         String commentText = "New comment";
 
         postRepository.addComment(postId, commentText);
@@ -257,7 +238,8 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void testUpdateContentWithoutImagePath() {
-        PostUpdateContentDto dto = new PostUpdateContentDto(1L, "New title", "New text", Set.of(Tag.POLITICS));
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+        PostUpdateContentDto dto = new PostUpdateContentDto(postId, "New title", "New text", Set.of(Tag.POLITICS));
 
         postRepository.updateContent(dto);
 
@@ -273,28 +255,31 @@ class JdbcNativePostRepositoryTest {
 
         Integer commentTotalCount = jdbcTemplate.queryForObject(
             """
-            SELECT COUNT(*) FROM comments WHERE post_id = 1
+            SELECT COUNT(*) FROM comments WHERE post_id = ?
             """,
-            Integer.class
+            Integer.class,
+            postId
         );
         assertNotNull(commentTotalCount);
         assertEquals(2, commentTotalCount);
 
         Integer tagTotalCount = jdbcTemplate.queryForObject(
             """
-            SELECT COUNT(*) FROM post_tag WHERE post_id = 1
+            SELECT COUNT(*) FROM post_tag WHERE post_id = ?
             """,
-            Integer.class
+            Integer.class,
+            postId
         );
         assertNotNull(tagTotalCount);
         assertEquals(1, tagTotalCount);
 
         Integer tagCount = jdbcTemplate.queryForObject(
             """
-            SELECT COUNT(*) FROM post_tag WHERE post_id = 1
-            AND tag_id = (SELECT id FROM tags WHERE name = 'POLITICS'); 
+            SELECT COUNT(*) FROM post_tag WHERE post_id = ?
+            AND tag_id = (SELECT id FROM tags WHERE name = 'POLITICS');
             """,
-            Integer.class
+            Integer.class,
+            postId
         );
         assertNotNull(tagCount);
         assertEquals(1, tagCount);
@@ -302,7 +287,8 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void testUpdateContentWithImagePath() {
-        PostUpdateContentDto dto = new PostUpdateContentDto(1L, "New title", "New text", Set.of(Tag.POLITICS));
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+        PostUpdateContentDto dto = new PostUpdateContentDto(postId, "New title", "New text", Set.of(Tag.POLITICS));
         String imagePath = "new_image_path.jpg";
 
         postRepository.updateContent(dto, imagePath);
@@ -319,28 +305,31 @@ class JdbcNativePostRepositoryTest {
 
         Integer commentTotalCount = jdbcTemplate.queryForObject(
             """
-            SELECT COUNT(*) FROM comments WHERE post_id = 1
+            SELECT COUNT(*) FROM comments WHERE post_id = ?
             """,
-            Integer.class
+            Integer.class,
+            postId
         );
         assertNotNull(commentTotalCount);
         assertEquals(2, commentTotalCount);
 
         Integer tagTotalCount = jdbcTemplate.queryForObject(
             """
-            SELECT COUNT(*) FROM post_tag WHERE post_id = 1
+            SELECT COUNT(*) FROM post_tag WHERE post_id = ?
             """,
-            Integer.class
+            Integer.class,
+            postId
         );
         assertNotNull(tagTotalCount);
         assertEquals(1, tagTotalCount);
 
         Integer tagCount = jdbcTemplate.queryForObject(
             """
-            SELECT COUNT(*) FROM post_tag WHERE post_id = 1
+            SELECT COUNT(*) FROM post_tag WHERE post_id = ?
             AND tag_id = (SELECT id FROM tags WHERE name = 'POLITICS');
             """,
-            Integer.class
+            Integer.class,
+            postId
         );
         assertNotNull(tagCount);
         assertEquals(1, tagCount);
@@ -348,20 +337,23 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void testIncrementLikes() {
-        postRepository.incrementLikes(1L);
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+        postRepository.incrementLikes(postId);
 
-        Integer likes = jdbcTemplate.queryForObject("SELECT likes FROM posts WHERE id = 1; ", Integer.class);
+        Integer likes = jdbcTemplate.queryForObject("SELECT likes FROM posts WHERE id = ?; ", Integer.class, postId);
         assertNotNull(likes);
         assertEquals(4, likes);
     }
 
     @Test
     void testUpdateComment() {
-        postRepository.updateComment(1L, "New comment text");
+        Long commentId = jdbcTemplate.queryForObject("SELECT id FROM comments WHERE text = 'First comment of first post';", Long.class);
+        postRepository.updateComment(commentId, "New comment text");
 
         Integer count = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM comments WHERE id = 1 AND text = 'New comment text';",
-            Integer.class
+            "SELECT COUNT(*) FROM comments WHERE id = ? AND text = 'New comment text';",
+            Integer.class,
+            commentId
         );
         assertNotNull(count);
         assertEquals(1, count);
@@ -369,18 +361,20 @@ class JdbcNativePostRepositoryTest {
 
     @Test
     void testDeletePost() {
-        postRepository.deletePost(1L);
+        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
+        postRepository.deletePost(postId);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM posts WHERE id = 1;", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM posts WHERE id = ?;", Integer.class, postId);
         assertNotNull(count);
         assertEquals(0, count);
     }
 
     @Test
     void testDeleteComment() {
-        postRepository.deleteComment(1L);
+        Long commentId = jdbcTemplate.queryForObject("SELECT id FROM comments WHERE text = 'First comment of first post';", Long.class);
+        postRepository.deleteComment(commentId);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM comments WHERE id = 1;", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM comments WHERE id = ?;", Integer.class, commentId);
         assertNotNull(count);
         assertEquals(0, count);
     }
