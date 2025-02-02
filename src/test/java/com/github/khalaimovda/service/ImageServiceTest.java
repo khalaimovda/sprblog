@@ -15,8 +15,7 @@ import java.nio.file.Path;
 import java.security.SecureRandom;
 import java.util.Comparator;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @SpringJUnitConfig(classes = ImageServiceTestConfig.class)
@@ -61,6 +60,31 @@ class ImageServiceTest {
 
         byte[] savedContent = Files.readAllBytes(savedFilePath);
         assertArrayEquals(imageBytes, savedContent);
+    }
+
+    @Test
+    void testGetImagePath() {
+        String filename = "test_image.jpg";
+
+        Path correctImagePath = imageLocation.resolve(filename);
+        Path imagePath = imageService.getImagePath(filename);
+        assertEquals(correctImagePath, imagePath);
+    }
+
+    @Test
+    void testGetImageSrcPath() {
+        assertEquals("images/test_image.jpg", imageService.getImageSrcPath("test_image.jpg"));
+    }
+
+    @Test
+    void testDeleteImage() throws IOException {
+        byte[] imageBytes = createRandomBytes();
+        Path imagePath = imageLocation.resolve("test_image.jpg");
+        Files.write(imagePath, imageBytes);
+        assertTrue(Files.exists(imagePath));
+
+        imageService.deleteImage("test_image.jpg");
+        assertFalse(Files.exists(imagePath));
     }
 
     private byte[] createRandomBytes() {
