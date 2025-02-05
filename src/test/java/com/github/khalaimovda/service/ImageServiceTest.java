@@ -1,52 +1,43 @@
 package com.github.khalaimovda.service;
 
-import com.github.khalaimovda.config.ImageServiceTestConfig;
+import com.github.khalaimovda.config.ImageServiceProperties;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
-import java.util.Comparator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@SpringBootTest(classes = ImageServiceTestConfig.class)
+@SpringBootTest(classes = ImageServiceImpl.class)
 @ActiveProfiles("test")
 class ImageServiceTest {
 
     @Autowired
-    private ResourceLoader resourceLoader;
-
-    @Autowired
-    private Path imageLocation;
+    private ImageServiceProperties properties;
 
     @Autowired
     private ImageService imageService;
 
     @BeforeEach
-    void cleanUpDirectory() throws IOException {
-        if (Files.exists(imageLocation)) {
-            Files.walk(imageLocation)
-                .sorted(Comparator.reverseOrder())
-                .forEach(path -> {
-                    try {
-                        Files.delete(path);
-                    } catch (IOException e) {
-                        throw new RuntimeException("Clean test image directory error", e);
-                    }
-                });
-        }
-        Files.createDirectories(imageLocation);
+    void setup() throws IOException {
+        Files.createDirectories(Paths.get(properties.getUploadDir()));
+    }
+
+    @AfterEach
+    void cleanup() throws IOException {
+        FileSystemUtils.deleteRecursively(Paths.get(properties.getUploadDir()));
     }
 
     @Test
@@ -58,7 +49,7 @@ class ImageServiceTest {
 
         String storedFilename = imageService.saveImage(imageFile);
 
-        Path savedFilePath = imageLocation.resolve(storedFilename);
+        Path savedFilePath = Paths.get(properties.getUploadDir()).resolve(storedFilename);
         assertTrue(Files.exists(savedFilePath));
 
         byte[] savedContent = Files.readAllBytes(savedFilePath);
@@ -69,20 +60,20 @@ class ImageServiceTest {
     void testGetImagePath() {
         String filename = "test_image.jpg";
 
-        Path correctImagePath = imageLocation.resolve(filename);
+        Path correctImagePath = Paths.get(properties.getUploadDir()).resolve(filename);
         Path imagePath = imageService.getImagePath(filename);
         assertEquals(correctImagePath, imagePath);
     }
 
     @Test
     void testGetImageSrcPath() {
-        assertEquals("images/test_image.jpg", imageService.getImageSrcPath("test_image.jpg"));
+        assertEquals(properties.getBaseUrl() + "test_image.jpg", imageService.getImageSrcPath("test_image.jpg"));
     }
 
     @Test
     void testDeleteImage() throws IOException {
         byte[] imageBytes = createRandomBytes();
-        Path imagePath = imageLocation.resolve("test_image.jpg");
+        Path imagePath = Paths.get(properties.getUploadDir()).resolve("test_image.jpg");
         Files.write(imagePath, imageBytes);
         assertTrue(Files.exists(imagePath));
 

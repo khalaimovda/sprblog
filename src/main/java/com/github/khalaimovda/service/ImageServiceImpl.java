@@ -1,8 +1,10 @@
 package com.github.khalaimovda.service;
 
+import com.github.khalaimovda.config.ImageServiceProperties;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Primary;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,15 +13,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+
 @Service
+@EnableConfigurationProperties(ImageServiceProperties.class)
 @Primary
+@RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
 
-    private final Path rootLocation;
+    private final ImageServiceProperties properties;
 
-    public ImageServiceImpl(ResourceLoader resourceLoader) throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:/static/images");
-        this.rootLocation = Paths.get(resource.getURI());
+    @PostConstruct
+    public void init() throws IOException {
+        Path imageStoragePath = Paths.get(properties.getUploadDir());
+        if (!Files.exists(imageStoragePath)) {
+            Files.createDirectories(imageStoragePath);
+        }
     }
 
     @Override
@@ -29,9 +37,9 @@ public class ImageServiceImpl implements ImageService {
         }
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-        Path destinationFile = rootLocation.resolve(fileName).normalize();
+        Path filePath = getImagePath(fileName);
         try {
-            Files.copy(file.getInputStream(), destinationFile);
+            Files.copy(file.getInputStream(), filePath);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -41,17 +49,17 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public Path getImagePath(String fileName) {
-        return rootLocation.resolve(fileName).normalize();
+        return Paths.get(properties.getUploadDir()).resolve(fileName).normalize();
     }
 
     @Override
-    public String getImageSrcPath(String filename) {
-        return "images/" + filename;
+    public String getImageSrcPath(String fileName) {
+        return properties.getBaseUrl() + fileName;
     }
 
     @Override
     public void deleteImage(String fileName) {
-        Path filePath = rootLocation.resolve(fileName).normalize();
+        Path filePath = getImagePath(fileName);
         try {
             Files.deleteIfExists(filePath);
         } catch (IOException e) {

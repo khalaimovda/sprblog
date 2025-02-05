@@ -4,6 +4,16 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
   sql:
     init:
       mode: always
+
+app:
+  images:
+    upload-dir: uploads/images
+    base-url: /images/
+

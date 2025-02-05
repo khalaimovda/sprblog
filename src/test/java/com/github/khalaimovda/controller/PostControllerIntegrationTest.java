@@ -1,27 +1,26 @@
 package com.github.khalaimovda.controller;
 
+import com.github.khalaimovda.config.ImageServiceProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.util.FileSystemUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import static com.github.khalaimovda.utils.DatabaseUtils.cleanData;
 import static com.github.khalaimovda.utils.DatabaseUtils.fillData;
-import static com.github.khalaimovda.utils.ImageUtils.cleanImages;
-import static com.github.khalaimovda.utils.ImageUtils.createImageFilePath;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,28 +28,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @SpringBootTest
+@AutoConfigureMockMvc
 @ActiveProfiles("test")
 @TestPropertySource(properties = "spring.sql.init.mode=always")
 class PostControllerIntegrationTest {
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    private MockMvc mockMvc;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private ResourceLoader resourceLoader;
-
-    private MockMvc mockMvc;
+    private ImageServiceProperties properties;
 
     @BeforeEach
     void setUp() throws IOException {
-        // Set Web Application Context
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-
+        FileSystemUtils.deleteRecursively(Paths.get(properties.getUploadDir()));
         cleanData(jdbcTemplate);
-        cleanImages(resourceLoader);
+
+        Files.createDirectories(Paths.get(properties.getUploadDir()));
         fillData(jdbcTemplate);
     }
 
@@ -173,7 +170,7 @@ class PostControllerIntegrationTest {
         assertNotNull(religionTagCount);
         assertEquals(1, religionTagCount);
 
-        Path imageFilePath = createImageFilePath(resourceLoader, imagePath);
+        Path imageFilePath = Paths.get(properties.getUploadDir()).resolve(imagePath);
         String savedImageContent = Files.readString(imageFilePath);
         assertEquals(imageContent, savedImageContent);
     }
@@ -276,10 +273,10 @@ class PostControllerIntegrationTest {
         assertNotNull(tagCount);
         assertEquals(1, tagCount);
 
-        Path prevImageFilePath = createImageFilePath(resourceLoader, "first_image.jpg");
+        Path prevImageFilePath = Paths.get(properties.getUploadDir()).resolve("first_image.jpg");
         assertFalse(Files.exists(prevImageFilePath));
 
-        Path imageFilePath = createImageFilePath(resourceLoader, imagePath);
+        Path imageFilePath = Paths.get(properties.getUploadDir()).resolve(imagePath);
         String savedImageContent = Files.readString(imageFilePath);
         assertEquals(imageContent, savedImageContent);
     }

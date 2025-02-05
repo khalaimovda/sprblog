@@ -20,7 +20,7 @@
             <h2 th:text="${post.title}">Название поста</h2>
         </div>
         <div class="image">
-            <img th:src="@{'/' + ${post.imagePath}}" alt="Post Image">
+            <img th:src="@{${post.imagePath}}" alt="Post Image">
         </div>
         <div class="text multiline-text" id="actualText" th:text="${post.text}">Текст поста</div>
         <div class="tags-likes">
