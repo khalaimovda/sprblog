@@ -3,8 +3,8 @@ package com.github.khalaimovda.config;
 
 import com.github.khalaimovda.service.ImageService;
 import com.github.khalaimovda.service.ImageServiceImpl;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Configuration
+@TestConfiguration
 public class ImageServiceTestConfig {
 
     @Bean

@@ -1,9 +1,10 @@
 package com.github.khalaimovda.service;
 
-import com.github.khalaimovda.config.PostServiceTestConfig;
+import com.github.khalaimovda.config.PostMapperTestConfig;
 import com.github.khalaimovda.dto.PostCreateDto;
 import com.github.khalaimovda.dto.PostCreateForm;
 import com.github.khalaimovda.dto.PostSummary;
+import com.github.khalaimovda.mapper.PostMapper;
 import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
@@ -13,8 +14,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -25,17 +31,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
-@SpringJUnitConfig(classes = PostServiceTestConfig.class)
+@SpringBootTest(classes = {PostServiceImpl.class, PostMapperTestConfig.class})
+@ActiveProfiles("test")
 class PostServiceTest {
+
+    @MockitoBean
+    private PostRepository postRepository;
+
+    @MockitoBean
+    private ImageService imageService;
+
+    @Autowired
+    private PostMapper postMapper;
 
     @Autowired
     private PostService postService;
-
-    @Autowired
-    private PostRepository postRepository;
-
-    @Autowired
-    private ImageService imageService;
 
     @BeforeEach
     void resetMocks() {

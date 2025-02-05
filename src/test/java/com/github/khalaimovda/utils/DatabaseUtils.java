@@ -18,21 +18,29 @@ public class DatabaseUtils {
         jdbcTemplate.execute("INSERT INTO tags (name) VALUES ('RELIGION');");
 
         jdbcTemplate.execute(" INSERT INTO posts (title, text, image_path, likes) VALUES('First', 'First text', 'first_image.jpg', 3);");
+
+        // Necessary to split the transaction to set different values in "created_at" column for correct sorting
+        jdbcTemplate.execute("COMMIT");
+
         jdbcTemplate.execute(" INSERT INTO posts (title, text, image_path, likes) VALUES('Second', 'Second text', 'second_image.jpg', 15);");
 
         jdbcTemplate.execute(
             """
-                INSERT INTO comments (text, post_id)
-                SELECT 'First comment of first post', id
-                FROM posts WHERE title = 'First';
-                """
+            INSERT INTO comments (text, post_id)
+            SELECT 'First comment of first post', id
+            FROM posts WHERE title = 'First';
+            """
         );
+
+        // Necessary to split the transaction to set different values in "created_at" column for correct sorting
+        jdbcTemplate.execute("COMMIT");
+
         jdbcTemplate.execute(
             """
-                INSERT INTO comments (text, post_id)
-                SELECT 'Second comment of first post', id
-                FROM posts WHERE title = 'First';
-                """
+            INSERT INTO comments (text, post_id)
+            SELECT 'Second comment of first post', id
+            FROM posts WHERE title = 'First';
+            """
         );
 
         jdbcTemplate.execute(

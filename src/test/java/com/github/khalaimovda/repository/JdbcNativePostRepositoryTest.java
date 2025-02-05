@@ -1,7 +1,5 @@
 package com.github.khalaimovda.repository;
 
-import com.github.khalaimovda.config.DataSourceConfig;
-import com.github.khalaimovda.data.DatabaseInitializer;
 import com.github.khalaimovda.dto.PostCreateDto;
 import com.github.khalaimovda.dto.PostSummary;
 import com.github.khalaimovda.dto.PostUpdateContentDto;
@@ -13,9 +11,11 @@ import com.github.khalaimovda.pagination.Pageable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.util.List;
 import java.util.Set;
@@ -24,8 +24,11 @@ import static com.github.khalaimovda.utils.DatabaseUtils.cleanData;
 import static com.github.khalaimovda.utils.DatabaseUtils.fillData;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringJUnitConfig(classes = {DataSourceConfig.class, JdbcNativePostRepository.class, DatabaseInitializer.class})
-@TestPropertySource(locations = "classpath:application-test.properties")
+
+@JdbcTest
+@Import(JdbcNativePostRepository.class)
+@ActiveProfiles("test")
+@TestPropertySource(properties = "spring.sql.init.mode=always")
 class JdbcNativePostRepositoryTest {
 
     @Autowired
@@ -33,9 +36,6 @@ class JdbcNativePostRepositoryTest {
 
     @Autowired
     private PostRepository postRepository;
-
-    @Autowired
-    private DatabaseInitializer databaseInitializer;
 
     @BeforeEach
     void setUp() {
