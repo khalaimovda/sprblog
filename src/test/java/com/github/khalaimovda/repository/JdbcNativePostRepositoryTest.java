@@ -209,34 +209,6 @@ class JdbcNativePostRepositoryTest {
     }
 
     @Test
-    void testAddComment() {
-        Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
-        String commentText = "New comment";
-
-        postRepository.addComment(postId, commentText);
-
-        Integer totalCount = jdbcTemplate.queryForObject(
-            """
-            SELECT COUNT(*) FROM comments WHERE post_id = ?
-            """,
-            Integer.class,
-            postId
-        );
-        assertNotNull(totalCount);
-        assertEquals(3, totalCount);
-
-        Integer count = jdbcTemplate.queryForObject(
-            """
-            SELECT COUNT(*) FROM comments WHERE post_id = ? AND text = ?;
-            """,
-            Integer.class,
-            postId, commentText
-        );
-        assertNotNull(count);
-        assertEquals(1, count);
-    }
-
-    @Test
     void testUpdateContentWithoutImagePath() {
         Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
         PostUpdateContentDto dto = new PostUpdateContentDto(postId, "New title", "New text", Set.of(Tag.POLITICS));
@@ -346,35 +318,11 @@ class JdbcNativePostRepositoryTest {
     }
 
     @Test
-    void testUpdateComment() {
-        Long commentId = jdbcTemplate.queryForObject("SELECT id FROM comments WHERE text = 'First comment of first post';", Long.class);
-        postRepository.updateComment(commentId, "New comment text");
-
-        Integer count = jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM comments WHERE id = ? AND text = 'New comment text';",
-            Integer.class,
-            commentId
-        );
-        assertNotNull(count);
-        assertEquals(1, count);
-    }
-
-    @Test
     void testDeletePost() {
         Long postId = jdbcTemplate.queryForObject("SELECT id FROM posts WHERE title = 'First';", Long.class);
         postRepository.deletePost(postId);
 
         Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM posts WHERE id = ?;", Integer.class, postId);
-        assertNotNull(count);
-        assertEquals(0, count);
-    }
-
-    @Test
-    void testDeleteComment() {
-        Long commentId = jdbcTemplate.queryForObject("SELECT id FROM comments WHERE text = 'First comment of first post';", Long.class);
-        postRepository.deleteComment(commentId);
-
-        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM comments WHERE id = ?;", Integer.class, commentId);
         assertNotNull(count);
         assertEquals(0, count);
     }

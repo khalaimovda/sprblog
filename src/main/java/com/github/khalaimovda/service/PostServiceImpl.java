@@ -8,7 +8,6 @@ import com.github.khalaimovda.pagination.Page;
 import com.github.khalaimovda.pagination.Pageable;
 import com.github.khalaimovda.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
@@ -49,29 +48,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void addComment(long postId, String commentText) {
-        postRepository.addComment(postId, commentText);
-    }
-
-    @Override
     public void likePost(long id) {
         postRepository.incrementLikes(id);
-    }
-
-    @Override
-    public void updateComment(long id, String text) {
-        postRepository.updateComment(id, text);
     }
 
     @Override
     public void deletePost(long id) {
         String imagePath = postRepository.deletePost(id);
         imageService.deleteImage(imagePath);
-    }
-
-    @Override
-    public void deleteComment(long id) {
-        postRepository.deleteComment(id);
     }
 
     @Override

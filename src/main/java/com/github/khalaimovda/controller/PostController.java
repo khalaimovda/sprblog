@@ -8,6 +8,7 @@ import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
 import com.github.khalaimovda.pagination.Pageable;
+import com.github.khalaimovda.service.CommentService;
 import com.github.khalaimovda.service.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class PostController {
 
     private final PostService postService;
+    private final CommentService commentService;
 
     @GetMapping
     public String getPosts(
@@ -56,7 +58,7 @@ public class PostController {
         @PathVariable(name = "id") Long postId,
         @RequestParam(name="text") String commentText
     ) {
-        postService.addComment(postId, commentText);
+        commentService.addComment(postId, commentText);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
@@ -81,7 +83,7 @@ public class PostController {
         @PathVariable(name = "commentId") Long commentId,
         @Valid @ModelAttribute CommentUpdateContentForm form
     ) {
-        postService.updateComment(commentId, form.getText());
+        commentService.updateComment(commentId, form.getText());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -96,7 +98,7 @@ public class PostController {
         @PathVariable(name = "postId") Long postId,
         @PathVariable(name = "commentId") Long commentId
     ) {
-        postService.deleteComment(commentId);
+        commentService.deleteComment(commentId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

@@ -1,9 +1,7 @@
 package com.github.khalaimovda.service;
 
 import com.github.khalaimovda.config.PostMapperTestConfig;
-import com.github.khalaimovda.dto.PostCreateDto;
-import com.github.khalaimovda.dto.PostCreateForm;
-import com.github.khalaimovda.dto.PostSummary;
+import com.github.khalaimovda.dto.*;
 import com.github.khalaimovda.mapper.PostMapper;
 import com.github.khalaimovda.model.Post;
 import com.github.khalaimovda.model.Tag;
@@ -13,12 +11,11 @@ import com.github.khalaimovda.repository.PostRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,6 +43,12 @@ class PostServiceTest {
 
     @Autowired
     private PostService postService;
+
+    @Captor
+    private ArgumentCaptor<PostUpdateContentDto> postUpdateContentDtoCaptor;
+
+    @Captor
+    private ArgumentCaptor<String> imagePathCaptor;
 
     @BeforeEach
     void resetMocks() {
@@ -150,5 +153,78 @@ class PostServiceTest {
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatusCode());
 
         verify(imageService, never()).getImageSrcPath(any());
+    }
+
+    @Test
+    void testLikePost() {
+        doNothing().when(postRepository).incrementLikes(13L);
+        postService.likePost(13L);
+        verify(postRepository).incrementLikes(13L);
+    }
+
+    @Test
+    void testDeletePost() {
+        String prevImagePath = "path/to/prev/image.jpg";
+        when(postRepository.deletePost(13L)).thenReturn(prevImagePath);
+        doNothing().when(imageService).deleteImage(prevImagePath);
+
+        postService.deletePost(13L);
+
+        verify(postRepository).deletePost(13L);
+        verify(imageService).deleteImage(prevImagePath);
+    }
+
+    @Test
+    void testUpdatePostContentWithoutImage() {
+        PostUpdateContentForm form = new PostUpdateContentForm();
+        form.setTitle("New title");
+        form.setText("New text");
+        form.setTags(Set.of(Tag.POLITICS, Tag.SCIENCE));
+
+        PostUpdateContentDto expectedDto = new PostUpdateContentDto(13L, form.getTitle(), form.getText(), form.getTags());
+
+        doNothing().when(postRepository).updateContent(any());
+
+        postService.updatePostContent(13L, form);
+
+        verify(postRepository).updateContent(postUpdateContentDtoCaptor.capture());
+
+        assertEquals(expectedDto, postUpdateContentDtoCaptor.getValue());
+    }
+
+    @Test
+    void testUpdatePostContentWithImage() {
+        String imageFilename = "updated_image.jpg";
+        String imageContent = "Updated image content";
+        MockMultipartFile imageFile = new MockMultipartFile(
+            "image",
+            imageFilename,
+            "image/jpeg",
+            imageContent.getBytes()
+        );
+        String imagePath = "path/to/" + imageFilename;
+        String prevImagePath = "path/to/prev/image.jpg";
+
+        PostUpdateContentForm form = new PostUpdateContentForm();
+        form.setTitle("New title");
+        form.setText("New text");
+        form.setTags(Set.of(Tag.ART));
+        form.setImage(imageFile);
+
+        PostUpdateContentDto expectedDto = new PostUpdateContentDto(13L, form.getTitle(), form.getText(), form.getTags());
+
+        when(imageService.saveImage(imageFile)).thenReturn(imagePath);
+        when(postRepository.updateContent(any(), anyString())).thenReturn(prevImagePath);
+        doNothing().when(imageService).deleteImage(anyString());
+
+        postService.updatePostContent(13L, form);
+
+        verify(imageService).saveImage(imageFile);
+
+        verify(postRepository).updateContent(postUpdateContentDtoCaptor.capture(), imagePathCaptor.capture());
+        assertEquals(expectedDto, postUpdateContentDtoCaptor.getValue());
+        assertEquals(imagePath, imagePathCaptor.getValue());
+
+        verify(imageService).deleteImage(prevImagePath);
     }
 }

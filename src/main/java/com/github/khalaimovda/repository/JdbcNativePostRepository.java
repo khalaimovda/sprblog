@@ -9,7 +9,6 @@ import com.github.khalaimovda.model.Tag;
 import com.github.khalaimovda.pagination.Page;
 import com.github.khalaimovda.pagination.Pageable;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.lang.Nullable;
@@ -167,15 +166,6 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public void addComment(long postId, String commentText) {
-        String query = """
-            INSERT INTO comments (text, post_id)
-            VALUES (?, ?);
-        """;
-        jdbcTemplate.update(query, commentText, postId);
-    }
-
-    @Override
     @Transactional
     public void updateContent(PostUpdateContentDto dto) {
         jdbcTemplate.update(
@@ -203,11 +193,6 @@ public class JdbcNativePostRepository implements PostRepository {
     }
 
     @Override
-    public void updateComment(long id, String text) {
-        jdbcTemplate.update("UPDATE comments SET text = ? WHERE id = ?", text, id);
-    }
-
-    @Override
     @Transactional
     public String deletePost(long id) {
         // Delete comments
@@ -222,11 +207,6 @@ public class JdbcNativePostRepository implements PostRepository {
             String.class,
             id
         );
-    }
-
-    @Override
-    public void deleteComment(long id) {
-        jdbcTemplate.update("DELETE FROM comments WHERE id = ?;", id);
     }
 
     private List<Comment> findComments(long postId) {
