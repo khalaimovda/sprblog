@@ -80,7 +80,7 @@ deletePost.addEventListener('click', () => {
         }
       })
       .then(data => {
-        window.location.pathname = "/sprblog/posts";
+        window.location.pathname = "/posts";
       })
       .catch(error => {
         console.error('Error:', error);
