@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
-@Primary
 @RequiredArgsConstructor
 public class JdbcNativePostRepository implements PostRepository {
 

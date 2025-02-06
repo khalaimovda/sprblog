@@ -16,7 +16,6 @@ import java.nio.file.Paths;
 
 @Service
 @EnableConfigurationProperties(ImageServiceProperties.class)
-@Primary
 @RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
 

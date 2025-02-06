@@ -17,7 +17,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 
 @Service
-@Primary
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
 
